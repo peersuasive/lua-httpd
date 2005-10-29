@@ -224,6 +224,7 @@ static int pWrite(lua_State *L)
     int sockfd;
     const char *data = NULL;
     int length       = 0;
+    int bytesSent    = 0 ;
 
     /* Get the number of arguments. */
     int n = lua_gettop(L);
@@ -261,8 +262,20 @@ static int pWrite(lua_State *L)
 	    return( pusherror(L, "write(int,string,[size])" ) );
     }
 
-    if ( write( sockfd, data, length) < 0 )
-	return( pusherror(L, "Problem writing to socket" ) );
+
+
+    while (bytesSent < length)
+    {
+	int sent = send( sockfd, data + bytesSent, 
+			 length - bytesSent, 0 );
+	
+	if (sent < 0)
+	{
+	    return( pusherror(L, "Problem writing to socket" ) );
+	}
+
+	bytesSent += sent ;
+    }   
 
     return 0; /* we never get here */
 }
