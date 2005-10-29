@@ -33,7 +33,7 @@
 --  *The* *code* *is* *not* *secure*.
 --
 --
--- $Id: httpd.lua,v 1.10 2005-10-29 07:24:43 steve Exp $
+-- $Id: httpd.lua,v 1.11 2005-10-29 07:27:54 steve Exp $
 
 
 --
@@ -41,7 +41,7 @@
 --
 socket = assert(loadlib("./libhttpd.so", "luaopen_libhttpd"))()
 
-print( "Loaded the socket library, version: \n  " .. socket.version );
+print( "\n\nLoaded the socket library, version: \n  " .. socket.version );
 
 
 --
@@ -72,11 +72,11 @@ function start_server( port, root )
     --
     --   Print some status messages.
     -- 
-    print( "Listening upon:" );
-    print( "  http://localhost:" .. port );
-    print( "Loading virtual hosts from beneath: " );
-    print( "  "  .. root );
-    print( "" );
+    print( "\nListening upon:" );
+    print( "  http://localhost:" .. port .. "/" );
+    print( "\nLoading virtual hosts from beneath: " );
+    print( "  "  .. root .. "\n\n");
+
 
     --
     --  Loop accepting requests.
@@ -201,13 +201,14 @@ function handleRequest( root, host, path, client )
     -- Open the file and return an error if it fails.
     --    
     if ( fileExists( file ) == false ) then 
+        print( "404 : " .. path );
 	return( sendError( client, 404, "File not found " .. urlEncode( path ) ) );
     end;
 
     --
     -- Show logging information here.
     --
-    print ( "Now serving " .. file );
+    print ( "Now serving file : " .. file );
 
 
     --
@@ -268,11 +269,9 @@ end
 function fileExists (file)
     local f = io.open(file, "rb");
     if f == nil then
-        print( "File " .. file .. " doesn't exist" );
         return false;
     else
         f:close();
-        print( "File " .. file .. " does exist" );
         return true;
     end
 end
