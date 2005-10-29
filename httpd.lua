@@ -36,7 +36,7 @@
 -- --
 -- http://ww.steve.org.uk/
 --
--- $Id: httpd.lua,v 1.14 2005-10-29 16:23:26 steve Exp $
+-- $Id: httpd.lua,v 1.15 2005-10-29 19:50:27 steve Exp $
 
 
 --
@@ -247,10 +247,10 @@ function handleRequest( root, host, path, client )
     --
     -- Read the file, and then serve it.
     --
-    f       = io.open(file, "rb");
+    f       = io.open( file, "rb" );
     size    = fileSize( f );
     local t = f:read("*all")
-    socket.write(client, t, fileSize( f ) );
+    socket.write( client, t );
     f:close();
 
     return size, "200" ;
