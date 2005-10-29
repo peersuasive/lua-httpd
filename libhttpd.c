@@ -51,11 +51,50 @@
 #include <unistd.h>
  
 #define MYNAME		"libhttpd"
-#define MYVERSION	MYNAME " library for " LUA_VERSION " / Oct 2005"
+#define VERSION	        "$Id: libhttpd.c,v 1.12 2005-10-29 19:58:20 steve Exp $"
+
 
 
 #include "lua.h"
 #include "lauxlib.h"
+
+
+
+/*
+ * Find and return the version identifier from our CVS marker.
+ */
+char * getVersion( )
+{
+    char *start  = NULL;
+    char *end    = NULL;
+    char *memory = NULL;
+    int length   = 0;
+
+    start = strstr( VERSION, ",v " );
+    if ( start == NULL )
+	return NULL;
+
+    /* Add on the ",v " text. */
+    start += 3;
+   
+    /* Now find the next space - after the version marker */
+    end = strstr( start, " " );
+    if ( end == NULL )
+	return NULL;
+
+
+    /* Allocate, and zero, enough memory for the result. */
+    length = end - start;
+    memory = (char *)malloc( length + 1 );
+    memset( memory, '\0', length+1);
+	
+
+    /* Copy in the version number. */
+    strncpy( memory, start, length );
+	
+    return( memory );
+}
+
 
 
 
@@ -353,10 +392,17 @@ static const luaL_reg R[] =
  */
 LUALIB_API int luaopen_libhttpd (lua_State *L)
 {
+    /* Version number from CVS marker. */
+    char *version = getVersion();
+
     luaL_openlib(L, MYNAME, R, 0);
-    lua_pushliteral(L,"version");		/** version */
-    lua_pushliteral(L,MYVERSION);
+    lua_pushliteral(L,"version");
+    lua_pushstring(L, version );
     lua_settable(L,-3);
+
+    /* Free version */
+    free( version );
+
     return 1;
 }
 
