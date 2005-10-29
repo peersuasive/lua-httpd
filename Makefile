@@ -1,9 +1,9 @@
 DIST_PREFIX = /tmp
-VERSION     = 0.2
+VERSION     = 0.3
 BASE        = lua-httpd
 
 
-all: libhttpd.c
+libhttpd.so: libhttpd.c
 	cc -fPIC `lua-config --include` -pedantic -Wall -O2 -c -o libhttpd.o libhttpd.c
 	cc -o libhttpd.so -shared libhttpd.o
 	strip libhttpd.so
