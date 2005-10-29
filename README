@@ -1,0 +1,56 @@
+
+lua-httpd
+---------
+
+  This directory contains four things:
+
+
+    libhttpd.c - Some networking functions callable from Lua.
+    httpd.lua  - A simple HTTP server written in Lua using them.
+    client.lua - A simple HTTP client.
+    Makefile   - To build ("make") and execute ("make test")
+
+ (Before building make sure you run:
+	apt-get install liblualib50-dev liblua50-dev )
+
+
+
+libhttpd.c
+----------
+
+  This function exports simple wrappers to lua of the following
+ networking primitives:
+
+	bind();
+	accept();
+	connect();
+	read();
+	write();
+	close();
+
+  These are sufficient to write simple HTTP servers in Lua.
+
+
+
+httpd.lua
+---------
+
+  This is an extremely basic server which listens upon port
+ 4444 and merely echos the requests it recieves from browsers.
+
+  The request to close it is:
+
+	http://localhost:4444/finish
+
+
+client.lua
+----------
+
+  This is a trivial HTTP client which will connect to
+ http://localhost:80/ and output the index page.
+
+
+
+Steve
+--
+
