@@ -36,7 +36,7 @@
 -- --
 -- http://ww.steve.org.uk/
 --
--- $Id: httpd.lua,v 1.15 2005-10-29 19:50:27 steve Exp $
+-- $Id: httpd.lua,v 1.16 2005-10-29 20:07:43 steve Exp $
 
 
 --
@@ -183,7 +183,7 @@ function processConnection( root, listener )
     -- 
     -- Note: The logging does not write the name of the virtual host.
     --
-    logAccess( ip, path, code, size, agent, referer );
+    logAccess( ip, path, code, size, agent, referer, major, minor );
 
     --
     --  Close the client connection.
@@ -363,9 +363,15 @@ end
 --
 -- Log an access request.
 --
-function logAccess( ip, request, status, size, agent, referer )
+function logAccess( ip, request, status, size, agent, referer, major, minor )
     date = os.date("%m/%b/%Y:%H:%M:%S +0000");
-    print( ip .. " - - [" .. date .. "] GET \"" .. request .. " HTTP/1.1\" " .. status .. " " .. size .. " \"" .. referer .."\" \"" .. agent .."\"" );
+
+    --
+    -- Format the logging line.
+    --
+    log  = string.format( '%s - - [%s] "GET %s HTTP/%s.%s" %s %s "%s" "%s"', ip, date, request, major, minor, status, size, referer, agent );
+
+    print( log );
 end
 
 
