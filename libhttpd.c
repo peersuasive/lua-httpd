@@ -264,7 +264,11 @@ static int pWrite(lua_State *L)
 	else
 	    return( pusherror(L, "write(int,string,[size])" ) );
 
-	length = strlen( data );
+	/*
+	 * Get the string length from Lua.  This takes account of
+	 * embedded NULLs.
+	 */
+	length = lua_strlen(L, data );
     }
     else if ( n == 3 )
     {
@@ -273,6 +277,9 @@ static int pWrite(lua_State *L)
 	else
 	    return( pusherror(L, "write(int,string,[size])" ) );
 
+	/*
+	 * Caller provided the length.
+	 */
 	if (lua_isnumber(L, 3))
 	    length = lua_tonumber(L, 3);
 	else
