@@ -1,21 +1,29 @@
 /* -*-mode: C++; style: K&R; c-basic-offset: 4 ; -*- */
 
 /**
- *  This simple shared library implements six functions which are callable
- * by LUA scripts:
+ *  libhttpd.cpp
+ *   Simple network primitives for use by the Lua 5.0 scripting engine.
  *
- *  socket = bind( port)
- *  client = accept( socket );
- *  sock   = connect( host, port );
- *  read( client );
- *  write( client, "data" );
- *  close( client );
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
  *
- * Steve Kemp
- * --
- * http://www.steve.org.uk/
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
+ *
+ *  Steve Kemp
+ *  ---
+ *  http://www.steve.org.uk/
  *
  */
+
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -42,10 +50,13 @@
 
 /**
  * Return an error string to the LUA script.
+ * @param L The Lua intepretter object.
+ * @param info An error string to return to the caller.  Pass NULL to use the return value of strerror.
  */
 static int pusherror(lua_State *L, const char *info)
 {
     lua_pushnil(L);
+
     if (info==NULL)
 	lua_pushstring(L, strerror(errno));
     else
@@ -58,6 +69,8 @@ static int pusherror(lua_State *L, const char *info)
 
 /**
  * Bind a socket to a port, and return it.
+ * @param L The lua intepreter object.
+ * @return The number of results to be passed back to the calling Lua script.
  */
 static int pBind(lua_State *L)
 {
@@ -102,6 +115,8 @@ static int pBind(lua_State *L)
 
 /**
  * Connect a socket to a host/port, and return it.
+ * @param L The lua intepreter object.
+ * @return The number of results to be passed back to the calling Lua script.
  */
 static int pConnect(lua_State *L)
 {
@@ -141,6 +156,8 @@ static int pConnect(lua_State *L)
 
 /**
  * Accept a new connection upon a socket.  Return the new client.
+ * @param L The lua intepreter object.
+ * @return The number of results to be passed back to the calling Lua script.
  */
 static int pAccept(lua_State *L)
 {
@@ -169,6 +186,8 @@ static int pAccept(lua_State *L)
 
 /**
  * Read from a socket, return the data and the length read.
+ * @param L The lua intepreter object.
+ * @return The number of results to be passed back to the calling Lua script.
  */
 static int pRead(lua_State *L)
 {
@@ -197,6 +216,8 @@ static int pRead(lua_State *L)
 
 /**
  * Write data to a socket.
+ * @param L The lua intepreter object.
+ * @return The number of results to be passed back to the calling Lua script.
  */
 static int pWrite(lua_State *L)
 {
@@ -223,6 +244,8 @@ static int pWrite(lua_State *L)
 
 /**
  * Close a socket.
+ * @param L The lua intepreter object.
+ * @return The number of results to be passed back to the calling Lua script.
  */
 static int pClose(lua_State *L)
 {
@@ -259,7 +282,10 @@ static const luaL_reg R[] =
 
 
 /**
- * Loading library.
+ * Bind our exported functions to the Lua intepretter, making our functions
+ * available to the calling script.
+ * @param L The lua intepreter object.
+ * @return 1 on success, 0 on failure.
  */
 LUALIB_API int luaopen_libhttpd (lua_State *L)
 {
