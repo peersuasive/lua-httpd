@@ -4,6 +4,8 @@
 --  A simple HTTP server written in Lua, using the binding primitives
 -- in 'libhttpd.so'.
 --
+--
+-- $Id : $
 
 
 --

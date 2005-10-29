@@ -4,6 +4,8 @@
 --  A simple HTTP client written in Lua, using the socket  primitives
 -- in 'libhttpd.so'.
 --
+--
+-- $Id : $
 
 
 --
