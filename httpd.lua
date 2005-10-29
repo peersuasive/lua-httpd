@@ -1,10 +1,10 @@
 --  -*-mode: C++; style: K&R; c-basic-offset: 4 ; -*- */
 
 --
---  A simple HTTP server written in Lua, using the binding primitives
+--  A simple HTTP server written in Lua, using the socket primitives
 -- in 'libhttpd.so'.
 --
---  This server will server multiple virtual hosts.  The only requirement
+--  This server will handle multiple virtual hosts.  The only requirement
 -- is that each virtual host must have the documents located beneath
 -- a common tree.  Note that directory indexes are not (yet) supported.
 --
@@ -27,7 +27,7 @@
 --  *The* *code* *is* *not* *secure*.
 --
 --
--- $Id: httpd.lua,v 1.7 2005-10-29 05:58:29 steve Exp $
+-- $Id: httpd.lua,v 1.8 2005-10-29 06:17:57 steve Exp $
 
 
 --
@@ -136,6 +136,12 @@ function processConnection( root, listener )
     _, _, path, major, minor  = string.find(request, "GET (.+) HTTP/(%d).(%d)");
 
     --
+    -- Decode the requested path.
+    --
+    path = urlDecode( path );
+
+
+    --
     -- Also find the Virtual Host.
     --
     _, _, host  = string.find(request, "Host: ([^:\r\n]+)");
@@ -172,7 +178,7 @@ function handleRequest( root, host, path, client )
     --
     -- Local file
     --
-    file = path;
+    file = string.strip(path);
 
     --
     -- Add a trailing "index.html" to paths ending in /
@@ -193,7 +199,7 @@ function handleRequest( root, host, path, client )
     local f = io.open(file, "rb");
     if f == nil then
         print "404";
-	return( sendError( client, 404, "File not found " .. path ) );
+	return( sendError( client, 404, "File not found " .. urlEncode( path ) ) );
     else
         f:close();
     end
@@ -240,7 +246,7 @@ function sendError( client, status, str )
     socket.write( client, "Connection: close\r\n\r\n" );
     socket.write( client, "<html><head><title>Error</title></head>" );
     socket.write( client, "<body><h1>Error</h1" );
-    socket.write( client, "<p>" .. urlEncode(str) .. "</p></body></html>" );
+    socket.write( client, "<p>" .. str .. "</p></body></html>" );
 end
 
 
@@ -259,9 +265,16 @@ end
 --  Utility function:   Does the string end with the given suffix?
 --
 function string.ends(String,End)
-      return End=='' or string.sub(String,-string.len(End))==End
+    return End=='' or string.sub(String,-string.len(End))==End
 end
 
+
+--
+--  Strip path traversal requests.
+--
+function string.strip( str )
+    return( string.gsub( str, "/../", "" ) );
+end
 
 
 --
@@ -279,7 +292,7 @@ end
 
 
 --
--- Utility function:  URL decode function (Not used)
+-- Utility function:  URL decode function
 --
 function urlDecode(str)
     str = string.gsub (str, "+", " ") 

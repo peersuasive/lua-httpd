@@ -1,11 +1,11 @@
 --  -*-mode: C++; style: K&R; c-basic-offset: 4 ; -*- */
 
 --
---  A simple HTTP client written in Lua, using the socket  primitives
+--  A simple HTTP client written in Lua, using the socket primitives
 -- in 'libhttpd.so'.
 --
 --
--- $Id: client.lua,v 1.4 2005-10-29 02:55:54 steve Exp $
+-- $Id: client.lua,v 1.5 2005-10-29 06:17:57 steve Exp $
 
 
 --
