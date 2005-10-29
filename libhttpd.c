@@ -32,9 +32,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/types.h> 
-#include <sys/socket.h>
+ 
+#include <arpa/inet.h>
+#include <sys/types.h>
 #include <netinet/in.h>
+#include <sys/socket.h>
 #include <netdb.h>
 
 #include <unistd.h>
@@ -178,8 +180,13 @@ static int pAccept(lua_State *L)
     if (newsockfd < 0) 
 	return( pusherror(L,"ERROR on accept"));
 
+    
+    /*
+     * Return the new socket and the connecting IP address.
+     */
     lua_pushnumber(L,newsockfd);
-    return 1;
+    lua_pushstring(L,inet_ntoa(cli_addr.sin_addr));
+    return 2;
 }
 
 
