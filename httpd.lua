@@ -16,18 +16,24 @@
 --  You should have a directory layout such as:
 --
 --    ./vhosts/
+--
 --    ./vhosts/bob/
+--    ./vhosts/bob/index.html        [etc]
+--
 --    ./vhosts/lappy/
+--    ./vhosts/lappy/index.html      [etc]
+--
 --    ./vhosts/localhost/
+--    ./vhosts/localhost/index.html  [etc]
 --
 --
---  (If you wish to allow for fully qualified hosts simply use symbolic
+--  (If you wish to allow for fully qualified hosts simply add symbolic
 -- links.)
 --
 --  *The* *code* *is* *not* *secure*.
 --
 --
--- $Id: httpd.lua,v 1.8 2005-10-29 06:17:57 steve Exp $
+-- $Id: httpd.lua,v 1.9 2005-10-29 07:21:26 steve Exp $
 
 
 --
@@ -39,15 +45,12 @@ print( "Loaded the socket library, version: \n  " .. socket.version );
 
 
 --
---  A table of MIME types - TODO load from /etc/mime.types
+--  A table of MIME types.  
+--  These values will be loaded from /etc/mime.types if available, otherwise
+-- a minimum set of defaults will be used.
 --
 mime = {};
-mime[ "html" ]  = "text/html";
-mime[ "txt"  ]  = "text/plain";
-mime[ "jpg"  ]  = "image/jpeg";
-mime[ "jpeg" ]  = "image/jpeg";
-mime[ "gif"  ]  = "image/gif";
-mime[ "png"  ]  = "image/png";
+
 
 
 
@@ -73,6 +76,7 @@ function start_server( port, root )
     print( "  http://localhost:" .. port );
     print( "Loading virtual hosts from beneath: " );
     print( "  "  .. root );
+    print( "" );
 
     --
     --  Loop accepting requests.
@@ -196,13 +200,9 @@ function handleRequest( root, host, path, client )
     --
     -- Open the file and return an error if it fails.
     --    
-    local f = io.open(file, "rb");
-    if f == nil then
-        print "404";
+    if ( fileExists( file ) == false ) then 
 	return( sendError( client, 404, "File not found " .. urlEncode( path ) ) );
-    else
-        f:close();
-    end
+    end;
 
     --
     -- Show logging information here.
@@ -261,6 +261,41 @@ function fileSize (file)
     return size
 end
 
+
+--
+--  Utility function:  Determine whether the given file exists.
+--
+function fileExists (file)
+    local f = io.open(file, "rb");
+    if f == nil then
+        print( "File " .. file .. " doesn't exist" );
+        return false;
+    else
+        f:close();
+        print( "File " .. file .. " does exist" );
+        return true;
+    end
+end
+
+
+--
+--  Read the mime file and setup mime types
+--
+function loadMimeFile(file, table)
+     local f = io.open( file, "r" );
+     while true do
+         local line = f:read()
+         if line == nil then break end
+         _, _, type, name = string.find( line, "^(.*)\t+([^\t]+)$" );
+         if ( type ~= nil ) then
+             for w in string.gfind(name, "([^%s]+)") do
+                  table[w] = type;
+             end
+         end
+     end
+end
+
+
 --
 --  Utility function:   Does the string end with the given suffix?
 --
@@ -304,8 +339,36 @@ end
 
 
 
+-
+-----
+---
 --
---  Now that we've defined all our functions start the server.
+--  This is the start of the real code, now that the functions have been
+-- defined we actuall execute from this point onwards.
+--
+---
+----
+-
+
+
+
+--
+--  Setup the MIME types our server will use for serving files.
+--
+if ( fileExists( "/etc/mime.types" ) ) then
+    loadMimeFile( "/etc/mime.types",  mime );
+else
+    mime[ "html" ]  = "text/html";
+    mime[ "txt"  ]  = "text/plain";
+    mime[ "jpg"  ]  = "image/jpeg";
+    mime[ "jpeg" ]  = "image/jpeg";
+    mime[ "gif"  ]  = "image/gif";
+    mime[ "png"  ]  = "image/png";
+end
+
+
+--
+--  Now start the server.
 --
 --
 start_server( 4444, "./vhosts/" );
