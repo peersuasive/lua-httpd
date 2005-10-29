@@ -268,7 +268,7 @@ static int pWrite(lua_State *L)
 	 * Get the string length from Lua.  This takes account of
 	 * embedded NULLs.
 	 */
-	length = lua_strlen(L, data );
+	length = lua_strlen(L, 2 );
     }
     else if ( n == 3 )
     {
