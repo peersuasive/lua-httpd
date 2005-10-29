@@ -1,7 +1,7 @@
 /* -*-mode: C++; style: K&R; c-basic-offset: 4 ; -*- */
 
 /**
- *  libhttpd.cpp
+ *  libhttpd.c
  *   Simple network primitives for use by the Lua 5.0 scripting engine.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -24,6 +24,15 @@
  *
  */
 
+
+/*
+ *  Each of the functions which passes, or returns, a socket merely
+ * accessess them via Lua's "tonumber", or "fromnumber" routines.
+ * 
+ *  This is suboptimal, however in the absense of threads it is likely
+ * to work out well in practice.
+ *
+ */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -81,12 +90,11 @@ static int pBind(lua_State *L)
     int on   = 1;
     int port = 0;
 
-    if (lua_isnone(L, 1))
-	return( pusherror(L, "bind(int) requires a port number" ) );
-    else if (lua_isnumber(L, 1))
+    if (lua_isnumber(L, 1))
 	port =lua_tonumber(L, 1);
     else
-	return( pusherror(L, "bind(int) a port number" ) );
+	return( pusherror(L, "bind(int) requires a port number" ) );
+
 
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd < 0) 
@@ -97,14 +105,15 @@ static int pBind(lua_State *L)
     setsockopt( sockfd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on) );
 
     bzero((char *) &serv_addr, sizeof(serv_addr));
-
     serv_addr.sin_family = AF_INET;
     serv_addr.sin_addr.s_addr = INADDR_ANY;
     serv_addr.sin_port = htons(port);
 
+    /* bind */
     if (bind(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0) 
 	return( pusherror(L, ("ERROR on binding") ));
 
+    /* queue five connections. */
     listen(sockfd,5);
 
     /* Return socket */
@@ -128,25 +137,22 @@ static int pConnect(lua_State *L)
     const char *host;
     int port = 0;
 
-    if (lua_isnone(L, 1))
-	return( pusherror(L, "connect(string, int) requires a hostname" ) );
-    else if (lua_isstring(L, 1))
+    if (lua_isstring(L, 1))
 	host = lua_tostring(L, 1);
     else
 	return( pusherror(L, "connect(string,int) incorrect first argument" ) );
-    if (lua_isnone(L, 2))
-	return( pusherror(L, "connect(string, int) requires a port number" ) );
-    else if (lua_isnumber(L, 2))
+    if (lua_isnumber(L, 2))
 	port = lua_tonumber(L, 2);
     else
 	return( pusherror(L, "connect(string,int) incorrect second argument" ) );
-
- 
+    /* Ge the host. */ 
     hp = gethostbyname(host);
     bcopy((char *)hp->h_addr, (char *)&sa.sin_addr, hp->h_length);
     sa.sin_family = hp->h_addrtype;
     sa.sin_port = htons(port);
     sockfd = socket(hp->h_addrtype, SOCK_STREAM, 0);
+
+    /* connect */
     ret = connect(sockfd, (struct sockaddr *)&sa, sizeof(sa));
 
     /* Return socket */
@@ -167,16 +173,16 @@ static int pAccept(lua_State *L)
     socklen_t clilen;
     struct sockaddr_in  cli_addr;
 
-    if (lua_isnone(L, 1))
-	return( pusherror(L, "accept(int) requires a socket." ) );
-    else if (lua_isnumber(L, 1))
+    if (lua_isnumber(L, 1))
 	sockfd =lua_tonumber(L, 1);
     else
-	return( pusherror(L, "accept(int) a port number" ) );
+	return( pusherror(L, "accept(int) requires listening socket." ) );
     
+    /* accept() */
     clilen = sizeof(cli_addr);
     newsockfd = accept(sockfd, (struct sockaddr *) &cli_addr, &clilen);
 
+    /* Return error on failure */
     if (newsockfd < 0) 
 	return( pusherror(L,"ERROR on accept"));
 
@@ -200,19 +206,20 @@ static int pRead(lua_State *L)
 {
     int sockfd;
     int n = 0;
-    char buffer[1024*16];
+
+    /* Buffer we read() into */
+    char buffer[4096];
     memset( buffer, '\0', sizeof(buffer));
     
-    if (lua_isnone(L, 1))
-	return( pusherror(L, "read(int)" ) );
-    else if (lua_isnumber(L, 1))
+    if (lua_isnumber(L, 1))
 	sockfd =lua_tonumber(L, 1);
     else
 	return( pusherror(L, "read(int)" ) );
     
+    /* Do the read */
     n = read(sockfd,buffer,sizeof(buffer)-1);
 
-
+    /* Return the data, and the length of that data */
     lua_pushnumber(L, n );
     lua_pushstring(L, buffer );
     
@@ -270,11 +277,13 @@ static int pWrite(lua_State *L)
     }
 
 
-
+    /*
+     * Loop sending the data.
+     */
     while (bytesSent < length)
     {
-	int sent = send( sockfd, data + bytesSent, 
-			 length - bytesSent, 0 );
+	/* Send some */
+	int sent = send( sockfd, data + bytesSent, length - bytesSent, 0 );
 	
 	if (sent < 0)
 	{
@@ -298,9 +307,7 @@ static int pClose(lua_State *L)
 {
     int sockfd;
 
-    if (lua_isnone(L, 1))
-	return( pusherror(L, "close(int)" ) );
-    else if (lua_isnumber(L, 1))
+    if (lua_isnumber(L, 1))
 	sockfd =lua_tonumber(L, 1);
     else
 	return( pusherror(L, "close(int)" ) );
