@@ -33,7 +33,7 @@
 --  *The* *code* *is* *not* *secure*.
 --
 --
--- $Id: httpd.lua,v 1.12 2005-10-29 16:00:17 steve Exp $
+-- $Id: httpd.lua,v 1.13 2005-10-29 16:16:34 steve Exp $
 
 
 --
@@ -102,7 +102,7 @@ function processConnection( root, listener )
     --
     --  Accept a new connection
     --
-    client = socket.accept( listener );
+    client,ip = socket.accept( listener );
 
     found   = 0;
     size    = 0;
@@ -177,7 +177,7 @@ function processConnection( root, listener )
     --
     -- HACK
     --
-    logAccess( "127.0.0.1", path, code, size, agent, referer );
+    logAccess( ip, path, code, size, agent, referer );
 
     --
     --  Close the client connection.
