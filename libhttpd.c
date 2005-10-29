@@ -222,19 +222,46 @@ static int pRead(lua_State *L)
 static int pWrite(lua_State *L)
 {
     int sockfd;
-    const char *data;
+    const char *data = NULL;
+    int length       = 0;
 
-    if (lua_isnone(L, 1))
-	return( pusherror(L, "write(int,string)" ) );
-    else if (lua_isnumber(L, 1))
+    /* Get the number of arguments. */
+    int n = lua_gettop(L);
+
+    if ( ( n != 2 ) && ( n != 3 ) )
+	return( pusherror(L, "write(int,string,[size])" ) );
+
+    if (lua_isnumber(L, 1))
 	sockfd =lua_tonumber(L, 1);
     else
-	return( pusherror(L, "write(int,string)" ) );
-    
-    /* Get the data to write. */
-    data = lua_tostring(L, 2);
+	return( pusherror(L, "write(int,string,[size])" ) );
 
-    if ( write( sockfd, data, strlen( data ) ) < 0 )
+    /*
+     * Supplied the string only
+     */
+    if ( n == 2 )
+    {
+	if (lua_isstring(L, 2))
+	    data = lua_tostring(L, 2);
+	else
+	    return( pusherror(L, "write(int,string,[size])" ) );
+
+	length = strlen( data );
+    }
+    else if ( n == 3 )
+    {
+	if (lua_isstring(L, 2))
+	    data = lua_tostring(L, 2);
+	else
+	    return( pusherror(L, "write(int,string,[size])" ) );
+
+	if (lua_isnumber(L, 3))
+	    length = lua_tonumber(L, 3);
+	else
+	    return( pusherror(L, "write(int,string,[size])" ) );
+    }
+
+    if ( write( sockfd, data, length) < 0 )
 	return( pusherror(L, "Problem writing to socket" ) );
 
     return 0; /* we never get here */
