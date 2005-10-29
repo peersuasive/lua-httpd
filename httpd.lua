@@ -4,30 +4,85 @@
 --  A simple HTTP server written in Lua, using the binding primitives
 -- in 'libhttpd.so'.
 --
+--  This server will server multiple virtual hosts.  The only requirement
+-- is that each virtual host must have the documents located beneath
+-- a common tree.
 --
--- $Id: httpd.lua,v 1.4 2005-10-29 02:55:54 steve Exp $
+--  For example to server the hosts:
+--    lappy
+--    bob
+--    localhost
+--
+--  You should have a directory layout such as:
+--
+--    ./vhosts/
+--    ./vhosts/bob/
+--    ./vhosts/lappy/
+--    ./vhosts/localhost/
+--
+--  Directory indexes are not supported.  Neither are CGI scripts or
+-- logging.
+--
+--  *The* *code* *is* *not* *secure*.
+--
+--
+-- $Id: httpd.lua,v 1.5 2005-10-29 05:19:08 steve Exp $
 
 
 --
 -- load the socket library
 --
-local socket = assert(loadlib("./libhttpd.so", "luaopen_libhttpd"))()
+socket = assert(loadlib("./libhttpd.so", "luaopen_libhttpd"))()
 
 print( "Loaded the socket library, version: \n  " .. socket.version );
 
 
 
+
 --
---  Global marker for whether we should terminate.
+--  Start a server upon the given port, using the given
+-- root path.
 --
-running = 1;
+--  The root path is designed to contain subdirectories for
+-- each given virtual host.
+--
+function start_server( port, root )
+    local running = 1;
+
+    --
+    --  Bind a socket to the given port
+    --
+    local listener = socket.bind( port );
+
+    --
+    --   Print some status messages.
+    -- 
+    print( "Listening upon:" );
+    print( "  http://localhost:" .. port );
+    print( "Loading virtual hosts from beneath: " );
+    print( "  "  .. root );
+
+    --
+    --  Loop accepting requests.
+    --
+    while ( running == 1 ) do
+        processConnection( root, listener );
+    end
+
+
+    --
+    -- Finished.
+    --
+    socket.close( listener );
+end
 
 
 
+
 --
---  Loop accepting and processing incoming connections.
+--  Process a single incoming connection.
 --
-function processConnection( listener ) 
+function processConnection( root, listener ) 
     --
     --  Accept a new connection
     --
@@ -62,28 +117,17 @@ function processConnection( listener )
     --  OK We now have a complete HTTP request of 'size' bytes long
     -- stored in 'request'.
     --
-    --  Merely echo it back to the client for the moment.
-    --
-    socket.write( client, "HTTP/1.0 200 OK\r\n" );
-    socket.write( client, "Content-type: text/plain\r\n" );
-    socket.write( client, "Connection: close\r\n\r\n" );
-    socket.write( client, request );
-
-
+    
     --
     -- Find the requested path.
     --
     _, _, path, major, minor  = string.find(request, "GET (.+) HTTP/(%d).(%d)");
-    print( "Request for : " .. path .. " (HTTP ".. major.."/"..minor..")" );
-
 
     --
-    -- For fun also find the Virtual Host.
+    -- Also find the Virtual Host.
     --
-    _, _, host  = string.find(request, "Host: ([^\r\n]+)");
-    if ( host ~= nil ) then
-       print( " " .. host );
-    end
+    _, _, host  = string.find(request, "Host: ([^:\r\n]+)");
+
 
     --
     -- If the request was for '/finish' then finish
@@ -92,6 +136,12 @@ function processConnection( listener )
         running = 0;
         print( "Terminating" );
         socket.write( client, "---\nFINISHED" );
+    else
+        
+        --
+        -- Otherwise attempt to handle the connection.
+        --
+        handleRequest( root, host, path, client );
     end
 
 
@@ -104,21 +154,74 @@ end
 
 
 --
---  Start the server upon port 4444
+--  Attempt to server the given path to the given client
 --
-listener = socket.bind( 4444 );
-print( "\nListening upon http://localhost:4444/\n" );
+function handleRequest( root, host, path, client )
+    --
+    -- Local file
+    --
+    file = path;
 
+    --
+    -- Add a trailing "index.html" to paths ending in /
+    --
+    if ( string.ends( file, "/" ) ) then  
+        file = file .. "index.html";
+    end
 
---
---  Loop accepting requests.
---
-while ( running == 1 ) do
-    processConnection( listener );
+    --
+    --  File must be beneath the vhost root.
+    --
+    file = root .. host .. file ; -- "/" .. file ;
+
+    print( "Opening : " .. file );
+    --
+    -- Open the file and give an error if it fails.
+    --    
+    local f = io.open(file, "r");
+    if f == nil then
+        print "404";
+	return( sendError( client, 404, "File not found " .. path ) );
+    else
+        --
+        -- OK the file exists.
+        --
+        socket.write( client, "HTTP/1.0 200 OK\r\n" );
+        socket.write( client, "Content-type: text/html\r\n" );
+        socket.write( client, "Connection: close\r\n\r\n" );
+
+        --
+        -- Read the file.
+        --
+	local t = f:read("*all")
+        f:close();
+        socket.write(client, t)
+    end
+
 end
 
 
 --
--- Finished.
+--  Send the given error message to the client.
 --
-socket.close( listener );
+function sendError( client, status, str )
+    socket.write( client, "HTTP/1.0 " .. status .. " OK\r\n" );
+    socket.write( client, "Content-type: text/html\r\n" );
+    socket.write( client, "Connection: close\r\n\r\n" );
+    socket.write( client, "<html><head><title>Error</title></head>" );
+    socket.write( client, "<body><h1>Error</h1" );
+    socket.write( client, "<p>" .. str .. "</p></body></html>" );
+end
+
+
+
+--
+--  Utility function, does the string end with the given suffix?
+--
+function string.ends(String,End)
+      return End=='' or string.sub(String,-string.len(End))==End
+end
+
+
+
+    start_server( 4444, "./vhosts/" );
