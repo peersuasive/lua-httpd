@@ -8,11 +8,14 @@ all: libhttpd.c
 	cc -o libhttpd.so -shared libhttpd.o
 	strip libhttpd.so
 
+
 clean:
 	-rm *~ libhttpd.so libhttpd.o
 
-test: all
-	lua httpd.lua
+
+diff:
+	cvs diff --unified 2>/dev/null
+
 
 dist:   clean
 	rm -rf $(DIST_PREFIX)/$(BASE)-$(VERSION)
@@ -23,3 +26,10 @@ dist:   clean
 	gzip $(DIST_PREFIX)/$(BASE)-$(VERSION).tar
 	mv $(DIST_PREFIX)/$(BASE)-$(VERSION).tar.gz .
 
+
+test: all
+	lua httpd.lua
+
+
+update:
+	cvs -z3 update -A -d 2>/dev/null
