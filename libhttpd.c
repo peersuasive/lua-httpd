@@ -51,7 +51,7 @@
 #include <unistd.h>
  
 #define MYNAME		"libhttpd"
-#define VERSION	        "$Id: libhttpd.c,v 1.12 2005-10-29 19:58:20 steve Exp $"
+#define VERSION	        "$Id: libhttpd.c,v 1.13 2005-10-29 20:12:01 steve Exp $"
 
 
 
@@ -143,7 +143,7 @@ static int pBind(lua_State *L)
     /* Enable address reuse */
     setsockopt( sockfd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on) );
 
-    bzero((char *) &serv_addr, sizeof(serv_addr));
+    memset( &serv_addr, '\0', sizeof(serv_addr));
     serv_addr.sin_family = AF_INET;
     serv_addr.sin_addr.s_addr = INADDR_ANY;
     serv_addr.sin_port = htons(port);
@@ -184,9 +184,9 @@ static int pConnect(lua_State *L)
 	port = lua_tonumber(L, 2);
     else
 	return( pusherror(L, "connect(string,int) incorrect second argument" ) );
-    /* Ge the host. */ 
+    /* Get the host. */ 
     hp = gethostbyname(host);
-    bcopy((char *)hp->h_addr, (char *)&sa.sin_addr, hp->h_length);
+    memcpy((char *)hp->h_addr, (char *)&sa.sin_addr, hp->h_length);
     sa.sin_family = hp->h_addrtype;
     sa.sin_port = htons(port);
     sockfd = socket(hp->h_addrtype, SOCK_STREAM, 0);
