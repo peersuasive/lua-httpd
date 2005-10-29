@@ -219,9 +219,12 @@ static int pRead(lua_State *L)
     /* Do the read */
     n = read(sockfd,buffer,sizeof(buffer)-1);
 
+    if ( n == -1 )
+	return( pusherror(L, "Problem reading from socket" ) );
+
     /* Return the data, and the length of that data */
     lua_pushnumber(L, n );
-    lua_pushstring(L, buffer );
+    lua_pushlstring(L, buffer, n );
     
     return( 2 );
 }
