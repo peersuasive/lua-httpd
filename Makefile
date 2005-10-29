@@ -1,5 +1,5 @@
 DIST_PREFIX = /tmp
-VERSION     = 0.1
+VERSION     = 0.2
 BASE        = lua-httpd
 
 
@@ -10,7 +10,8 @@ all: libhttpd.c
 
 
 clean:
-	-rm *~ libhttpd.so libhttpd.o
+	-find . -name '*~' -exec rm \{\} \;
+	-rm -f libhttpd.so libhttpd.o
 
 
 diff:
