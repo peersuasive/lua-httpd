@@ -35,8 +35,12 @@ libhttpd.c
 httpd.lua
 ---------
 
-  This is an extremely basic server which listens upon port
- 4444 and merely echos the requests it recieves from browsers.
+  This is an simple HTTP server which supports multiple virtual hosts.
+
+  By default it will serve requests for files located beneath ./vhosts,
+ each directory beneath there will be taken as a hostname to serve.
+
+  The server will bind to port 4444 by default.
 
   The request to close it is:
 
