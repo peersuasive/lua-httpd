@@ -26,7 +26,7 @@
 --  *The* *code* *is* *not* *secure*.
 --
 --
--- $Id: httpd.lua,v 1.5 2005-10-29 05:19:08 steve Exp $
+-- $Id: httpd.lua,v 1.6 2005-10-29 05:49:38 steve Exp $
 
 
 --
@@ -36,6 +36,17 @@ socket = assert(loadlib("./libhttpd.so", "luaopen_libhttpd"))()
 
 print( "Loaded the socket library, version: \n  " .. socket.version );
 
+
+--
+--  A table of MIME types
+--
+mime = {};
+mime[ "html" ]  = "text/html";
+mime[ "txt"  ]  = "text/plain";
+mime[ "jpg"  ]  = "image/jpeg";
+mime[ "jpeg" ]  = "image/jpeg";
+mime[ "gif"  ]  = "image/gif";
+mime[ "png"  ]  = "image/png";
 
 
 
@@ -174,29 +185,39 @@ function handleRequest( root, host, path, client )
     --
     file = root .. host .. file ; -- "/" .. file ;
 
-    print( "Opening : " .. file );
+
     --
     -- Open the file and give an error if it fails.
     --    
-    local f = io.open(file, "r");
+    local f = io.open(file, "rb");
     if f == nil then
         print "404";
 	return( sendError( client, 404, "File not found " .. path ) );
     else
-        --
-        -- OK the file exists.
-        --
-        socket.write( client, "HTTP/1.0 200 OK\r\n" );
-        socket.write( client, "Content-type: text/html\r\n" );
-        socket.write( client, "Connection: close\r\n\r\n" );
-
-        --
-        -- Read the file.
-        --
-	local t = f:read("*all")
         f:close();
-        socket.write(client, t)
     end
+
+    print ( file );
+
+    --
+    -- Find the suffix to get the mime.type.
+    --
+    _, _, ext  = string.find( file, "\.([^\.]+)$" );
+    if ( ext == nil ) then
+       ext = "html";   -- HACK
+    end
+    
+    socket.write( client, "HTTP/1.0 200 OK\r\n" );
+    socket.write( client, "Content-type: " .. mime[ ext]  .. "\r\n" );
+    socket.write( client, "Connection: close\r\n\r\n" );
+
+    --
+    -- Read the file.
+    --
+    f = io.open(file, "rb");
+    local t = f:read("*all")
+    socket.write(client, t, fsize( f ) );
+    f:close();
 
 end
 
@@ -216,12 +237,21 @@ end
 
 
 --
+--  Determine the file size.
+--
+function fsize (file)
+    local current = file:seek()      -- get current position
+    local size = file:seek("end")    -- get file size
+    file:seek("set", current)        -- restore position
+    return size
+end
+
+--
 --  Utility function, does the string end with the given suffix?
 --
 function string.ends(String,End)
       return End=='' or string.sub(String,-string.len(End))==End
 end
-
 
 
     start_server( 4444, "./vhosts/" );
