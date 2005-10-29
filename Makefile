@@ -3,7 +3,9 @@ VERSION     = 0.3
 BASE        = lua-httpd
 
 
-libhttpd.so: libhttpd.c
+OUT         = libhttpd.so
+
+$(OUT): libhttpd.c
 	cc -fPIC `lua-config --include` -pedantic -Wall -O2 -c -o libhttpd.o libhttpd.c
 	cc -o libhttpd.so -shared libhttpd.o
 	strip libhttpd.so
@@ -28,7 +30,7 @@ dist:   clean
 	mv $(DIST_PREFIX)/$(BASE)-$(VERSION).tar.gz .
 
 
-test: all
+test: $(OUT)
 	lua httpd.lua
 
 
