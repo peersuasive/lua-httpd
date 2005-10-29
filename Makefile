@@ -6,7 +6,7 @@ BASE        = lua-httpd
 OUT         = libhttpd.so
 
 $(OUT): libhttpd.c
-	cc -fPIC `lua-config --include` -pedantic -Wall -O2 -c -o libhttpd.o libhttpd.c
+	cc -fPIC `lua-config --include` -pedantic -ansi -Wall -O2 -c -o libhttpd.o libhttpd.c
 	cc -o libhttpd.so -shared libhttpd.o
 	strip libhttpd.so
 
