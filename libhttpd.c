@@ -179,7 +179,7 @@ static int pAccept(lua_State *L)
 	return( pusherror(L,"ERROR on accept"));
 
     lua_pushnumber(L,newsockfd);
-    return 1; /* we never get here */
+    return 1;
 }
 
 
@@ -277,7 +277,7 @@ static int pWrite(lua_State *L)
 	bytesSent += sent ;
     }   
 
-    return 0; /* we never get here */
+    return 0;
 }
 
 
