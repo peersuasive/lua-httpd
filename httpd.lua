@@ -5,7 +5,7 @@
 -- in 'libhttpd.so'.
 --
 --
--- $Id : $
+-- $Id: httpd.lua,v 1.4 2005-10-29 02:55:54 steve Exp $
 
 
 --
