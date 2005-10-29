@@ -6,9 +6,9 @@
 --
 --  This server will server multiple virtual hosts.  The only requirement
 -- is that each virtual host must have the documents located beneath
--- a common tree.
+-- a common tree.  Note that directory indexes are not (yet) supported.
 --
---  For example to server the hosts:
+--  For example to serve the three virtual hosts:
 --    lappy
 --    bob
 --    localhost
@@ -20,13 +20,14 @@
 --    ./vhosts/lappy/
 --    ./vhosts/localhost/
 --
---  Directory indexes are not supported.  Neither are CGI scripts or
--- logging.
+--
+--  (If you wish to allow for fully qualified hosts simply use symbolic
+-- links.)
 --
 --  *The* *code* *is* *not* *secure*.
 --
 --
--- $Id: httpd.lua,v 1.6 2005-10-29 05:49:38 steve Exp $
+-- $Id: httpd.lua,v 1.7 2005-10-29 05:58:29 steve Exp $
 
 
 --
@@ -38,7 +39,7 @@ print( "Loaded the socket library, version: \n  " .. socket.version );
 
 
 --
---  A table of MIME types
+--  A table of MIME types - TODO load from /etc/mime.types
 --
 mime = {};
 mime[ "html" ]  = "text/html";
@@ -52,9 +53,9 @@ mime[ "png"  ]  = "image/png";
 
 --
 --  Start a server upon the given port, using the given
--- root path.
+-- root directory path.
 --
---  The root path is designed to contain subdirectories for
+--  The root path is designed to contain sub-directories for
 -- each given virtual host.
 --
 function start_server( port, root )
@@ -141,7 +142,7 @@ function processConnection( root, listener )
 
 
     --
-    -- If the request was for '/finish' then finish
+    -- If the request was for '/finish' then terminate ourselves
     --
     if ( path == "/finish" ) then
         running = 0;
@@ -165,7 +166,7 @@ end
 
 
 --
---  Attempt to server the given path to the given client
+--  Attempt to serve the given path to the given client
 --
 function handleRequest( root, host, path, client )
     --
@@ -183,11 +184,11 @@ function handleRequest( root, host, path, client )
     --
     --  File must be beneath the vhost root.
     --
-    file = root .. host .. file ; -- "/" .. file ;
+    file = root .. host .. file ;
 
 
     --
-    -- Open the file and give an error if it fails.
+    -- Open the file and return an error if it fails.
     --    
     local f = io.open(file, "rb");
     if f == nil then
@@ -197,7 +198,11 @@ function handleRequest( root, host, path, client )
         f:close();
     end
 
-    print ( file );
+    --
+    -- Show logging information here.
+    --
+    print ( "Now serving " .. file );
+
 
     --
     -- Find the suffix to get the mime.type.
@@ -207,19 +212,23 @@ function handleRequest( root, host, path, client )
        ext = "html";   -- HACK
     end
     
+    --
+    -- Send out the header.
+    --
     socket.write( client, "HTTP/1.0 200 OK\r\n" );
     socket.write( client, "Content-type: " .. mime[ ext]  .. "\r\n" );
     socket.write( client, "Connection: close\r\n\r\n" );
 
     --
-    -- Read the file.
+    -- Read the file, and then serve it.
     --
     f = io.open(file, "rb");
     local t = f:read("*all")
-    socket.write(client, t, fsize( f ) );
+    socket.write(client, t, fileSize( f ) );
     f:close();
 
 end
+
 
 
 --
@@ -231,15 +240,15 @@ function sendError( client, status, str )
     socket.write( client, "Connection: close\r\n\r\n" );
     socket.write( client, "<html><head><title>Error</title></head>" );
     socket.write( client, "<body><h1>Error</h1" );
-    socket.write( client, "<p>" .. str .. "</p></body></html>" );
+    socket.write( client, "<p>" .. urlEncode(str) .. "</p></body></html>" );
 end
 
 
 
 --
---  Determine the file size.
+--  Utility function:  Determine the size of an open file.
 --
-function fsize (file)
+function fileSize (file)
     local current = file:seek()      -- get current position
     local size = file:seek("end")    -- get file size
     file:seek("set", current)        -- restore position
@@ -247,11 +256,43 @@ function fsize (file)
 end
 
 --
---  Utility function, does the string end with the given suffix?
+--  Utility function:   Does the string end with the given suffix?
 --
 function string.ends(String,End)
       return End=='' or string.sub(String,-string.len(End))==End
 end
 
 
-    start_server( 4444, "./vhosts/" );
+
+--
+-- Utility function:  URL encoding function
+--
+function urlEncode(str)
+    if (str) then
+        str = string.gsub (str, "\n", "\r\n") 
+        str = string.gsub (str, "([^%w ])",
+            function (c) return string.format ("%%%02X", string.byte(c)) end) 
+        str = string.gsub (str, " ", "+") 
+    end 
+    return str 
+end
+
+
+--
+-- Utility function:  URL decode function (Not used)
+--
+function urlDecode(str)
+    str = string.gsub (str, "+", " ") 
+    str = string.gsub (str, "%%(%x%x)", function(h) return string.char(tonumber(h,16)) end) 
+    str = string.gsub (str, "\r\n", "\n") 
+    return str 
+end
+
+
+
+
+--
+--  Now that we've defined all our functions start the server.
+--
+--
+start_server( 4444, "./vhosts/" );
