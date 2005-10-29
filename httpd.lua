@@ -33,7 +33,7 @@
 --  *The* *code* *is* *not* *secure*.
 --
 --
--- $Id: httpd.lua,v 1.11 2005-10-29 07:27:54 steve Exp $
+-- $Id: httpd.lua,v 1.12 2005-10-29 16:00:17 steve Exp $
 
 
 --
@@ -106,6 +106,7 @@ function processConnection( root, listener )
 
     found   = 0;
     size    = 0;
+    code    = 0;
     request = "";
 
 
@@ -146,9 +147,12 @@ function processConnection( root, listener )
 
 
     --
-    -- Also find the Virtual Host.
+    -- find the Virtual Host which we need for serving, and find the
+    -- user agent and referer for logging purposes.
     --
-    _, _, host  = string.find(request, "Host: ([^:\r\n]+)");
+    _, _, host    = string.find(request, "Host: ([^:\r\n]+)");
+    _, _, agent   = string.find(request, "Agent: ([^\r\n]+)");
+    _, _, referer = string.find(request, "Referer: ([^\r\n]+)");
 
 
     --
@@ -163,9 +167,17 @@ function processConnection( root, listener )
         --
         -- Otherwise attempt to handle the connection.
         --
-        handleRequest( root, host, path, client );
+        size, code = handleRequest( root, host, path, client );
     end
 
+    if ( agent == nil )   then agent   = "-" end;
+    if ( referer == nil ) then referer = "-" end;
+    if ( code == nill )   then code    = 0 ; end;
+
+    --
+    -- HACK
+    --
+    logAccess( "127.0.0.1", path, code, size, agent, referer );
 
     --
     --  Close the client connection.
@@ -182,7 +194,7 @@ function handleRequest( root, host, path, client )
     --
     -- Local file
     --
-    file = string.strip(path);
+    file =path;
 
     --
     -- Add a trailing "index.html" to paths ending in /
@@ -196,19 +208,19 @@ function handleRequest( root, host, path, client )
     --
     file = root .. host .. file ;
 
+    --
+    --  Attempt to sanitize the input Virtual Host + requested path.
+    --
+    file = string.strip( file );
+
 
     --
     -- Open the file and return an error if it fails.
     --    
     if ( fileExists( file ) == false ) then 
-        print( "404 : " .. path );
-	return( sendError( client, 404, "File not found " .. urlEncode( path ) ) );
+        size = sendError( client, 404, "File not found " .. urlEncode( path ) );
+        return size, "404";
     end;
-
-    --
-    -- Show logging information here.
-    --
-    print ( "Now serving file : " .. file );
 
 
     --
@@ -223,31 +235,37 @@ function handleRequest( root, host, path, client )
     -- Send out the header.
     --
     socket.write( client, "HTTP/1.0 200 OK\r\n" );
-    socket.write( client, "Content-type: " .. mime[ ext]  .. "\r\n" );
+    socket.write( client, "Content-type: " .. mime[ ext ]  .. "\r\n" );
     socket.write( client, "Connection: close\r\n\r\n" );
 
     --
     -- Read the file, and then serve it.
     --
     f = io.open(file, "rb");
+    size = fileSize( f );
     local t = f:read("*all")
     socket.write(client, t, fileSize( f ) );
     f:close();
 
+    return size, "200" ;
 end
 
 
 
 --
 --  Send the given error message to the client.
+--  Return the length of data sent to the client so we know what to log.
 --
 function sendError( client, status, str )
-    socket.write( client, "HTTP/1.0 " .. status .. " OK\r\n" );
-    socket.write( client, "Content-type: text/html\r\n" );
-    socket.write( client, "Connection: close\r\n\r\n" );
-    socket.write( client, "<html><head><title>Error</title></head>" );
-    socket.write( client, "<body><h1>Error</h1" );
-    socket.write( client, "<p>" .. str .. "</p></body></html>" );
+    message = "HTTP/1.0 " .. status .. " OK\r\n" ;
+    message = message .. "Content-type: text/html\r\n";
+    message = message .. "Connection: close\r\n\r\n" ;
+    message = message .. "<html><head><title>Error</title></head>" ;
+    message = message .. "<body><h1>Error</h1" ;
+    message = message .. "<p>" .. str .. "</p></body></html>" ;
+
+    socket.write( client, message );
+    return string.len(message) ;
 end
 
 
@@ -333,6 +351,15 @@ function urlDecode(str)
     str = string.gsub (str, "%%(%x%x)", function(h) return string.char(tonumber(h,16)) end) 
     str = string.gsub (str, "\r\n", "\n") 
     return str 
+end
+
+
+--
+-- Log an access request.
+--
+function logAccess( ip, request, status, size, agent, referer )
+    date = os.date("%m/%b/%Y:%H:%M:%S +0000");
+    print( ip .. " - - [" .. date .. "] GET \"" .. request .. " HTTP/1.1\" " .. status .. " " .. size .. " \"" .. referer .."\" \"" .. agent .."\"" );
 end
 
 
