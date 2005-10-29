@@ -32,8 +32,11 @@
 --
 --  *The* *code* *is* *not* *secure*.
 --
+-- Steve Kemp
+-- --
+-- http://ww.steve.org.uk/
 --
--- $Id: httpd.lua,v 1.13 2005-10-29 16:16:34 steve Exp $
+-- $Id: httpd.lua,v 1.14 2005-10-29 16:23:26 steve Exp $
 
 
 --
@@ -175,7 +178,10 @@ function processConnection( root, listener )
     if ( code == nill )   then code    = 0 ; end;
 
     --
-    -- HACK
+    -- Log the access in something resembling the Apache common
+    -- log format.
+    -- 
+    -- Note: The logging does not write the name of the virtual host.
     --
     logAccess( ip, path, code, size, agent, referer );
 
@@ -194,12 +200,12 @@ function handleRequest( root, host, path, client )
     --
     -- Local file
     --
-    file =path;
+    file = path;
 
     --
     -- Add a trailing "index.html" to paths ending in /
     --
-    if ( string.ends( file, "/" ) ) then  
+    if ( string.endsWith( file, "/" ) ) then  
         file = file .. "index.html";
     end
 
@@ -241,8 +247,8 @@ function handleRequest( root, host, path, client )
     --
     -- Read the file, and then serve it.
     --
-    f = io.open(file, "rb");
-    size = fileSize( f );
+    f       = io.open(file, "rb");
+    size    = fileSize( f );
     local t = f:read("*all")
     socket.write(client, t, fileSize( f ) );
     f:close();
@@ -316,7 +322,7 @@ end
 --
 --  Utility function:   Does the string end with the given suffix?
 --
-function string.ends(String,End)
+function string.endsWith(String,End)
     return End=='' or string.sub(String,-string.len(End))==End
 end
 
@@ -383,7 +389,11 @@ end
 --
 if ( fileExists( "/etc/mime.types" ) ) then
     loadMimeFile( "/etc/mime.types",  mime );
-else
+else 
+    --
+    --  The global MIME types file does not exist.
+    --  Setup minimal defaults.
+    --
     mime[ "html" ]  = "text/html";
     mime[ "txt"  ]  = "text/plain";
     mime[ "jpg"  ]  = "image/jpeg";
