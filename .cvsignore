@@ -1,2 +1,3 @@
 libhttpd.o
 libhttpd.so
+build-stamp
