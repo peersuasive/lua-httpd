@@ -30,6 +30,12 @@ dist:   clean
 	mv $(DIST_PREFIX)/$(BASE)-$(VERSION).tar.gz .
 
 
+install: $(OUT)
+	mkdir -p /usr/lib/lua/5.0
+	mv $(OUT) /usr/lib/lua/5.0/
+	mkdir -p /usr/share/lua50
+	cp default.lua /usr/share/lua50/libhttpd.lua
+
 test: $(OUT)
 	lua httpd.lua
 
