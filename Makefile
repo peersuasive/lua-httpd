@@ -14,6 +14,7 @@ $(OUT): libhttpd.c
 clean:
 	-find . -name '*~' -exec rm \{\} \;
 	-rm -f libhttpd.so libhttpd.o
+	-rm -f build-stamp
 
 
 diff:
