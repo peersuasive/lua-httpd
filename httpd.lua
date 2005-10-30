@@ -48,7 +48,7 @@
 -- --
 -- http://www.steve.org.uk/
 --
--- $Id: httpd.lua,v 1.18 2005-10-30 15:24:05 steve Exp $
+-- $Id: httpd.lua,v 1.19 2005-10-30 15:27:54 steve Exp $
 
 
 --
@@ -78,7 +78,7 @@ mime = {};
 -- each given virtual host.
 --
 function start_server( port, root )
-    local running = 1;
+    running = 1;
 
     --
     --  Bind a socket to the given port
@@ -176,8 +176,12 @@ function processConnection( root, listener )
     --
     if ( path == "/finish" ) then
         running = 0;
-        print( "Terminating" );
-        socket.write( client, "---\nFINISHED" );
+
+        socket.write( client, "HTTP/1.0 200 OK\r\n" );
+        socket.write( client, "Content-type: text/html\r\n" );
+        socket.write( client, "Connection: close\r\n\r\n" );
+        socket.write( client, "<html><head><title>Server Terminated</title></head>" );
+        socket.write( client, "<body><h1>Server Terminated</h1><p>As per your request.</p></body></html>");
     else
         
         --
@@ -197,6 +201,11 @@ function processConnection( root, listener )
     -- Note: The logging does not write the name of the virtual host.
     --
     logAccess( ip, path, code, size, agent, referer, major, minor );
+
+
+    if ( running == 0 ) then
+        print( "Terminating as per request from " .. ip );
+    end
 
     --
     --  Close the client connection.
