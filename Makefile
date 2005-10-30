@@ -20,6 +20,17 @@ diff:
 	cvs diff --unified 2>/dev/null
 
 
+debian: clean dist
+	mkdir tmp
+	mv $(BASE)-$(VERSION).tar.gz tmp/$(BASE)_$(VERSION).orig.tar.gz
+	cd tmp && tar -zxvf $(BASE)_$(VERSION).orig.tar.gz
+	find tmp/ -name CVS -exec rm -rf \{\} \;
+	cd tmp/$(BASE)-$(VERSION) && debuild -sa
+	mv tmp/$(BASE)_* .
+	rm -rf tmp/
+
+
+
 dist:   clean
 	rm -rf $(DIST_PREFIX)/$(BASE)-$(VERSION)
 	rm -f $(DIST_PREFIX)/$(BASE)-$(VERSION).tar.gz
