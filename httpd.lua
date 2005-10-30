@@ -36,13 +36,14 @@
 -- --
 -- http://ww.steve.org.uk/
 --
--- $Id: httpd.lua,v 1.16 2005-10-29 20:07:43 steve Exp $
+-- $Id: httpd.lua,v 1.17 2005-10-30 01:47:10 steve Exp $
 
 
 --
 -- load the socket library
 --
-socket = assert(loadlib("./libhttpd.so", "luaopen_libhttpd"))()
+socket = require( "libhttpd" );
+
 
 print( "\n\nLoaded the socket library, version: \n  " .. socket.version );
 

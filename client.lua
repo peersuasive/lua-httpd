@@ -5,13 +5,13 @@
 -- in 'libhttpd.so'.
 --
 --
--- $Id: client.lua,v 1.5 2005-10-29 06:17:57 steve Exp $
+-- $Id: client.lua,v 1.6 2005-10-30 01:47:10 steve Exp $
 
 
 --
 -- load the socket library
 --
-local socket = assert(loadlib("./libhttpd.so", "luaopen_libhttpd"))()
+socket = require( "libhttpd" );
 print( "Loaded the socket library, version: \n  " .. socket.version );
 
 

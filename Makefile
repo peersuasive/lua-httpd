@@ -40,5 +40,9 @@ test: $(OUT)
 	lua httpd.lua
 
 
+uninstall:
+	rm -f /usr/lib/lua/5.0/$(OUT)
+	rm -f /usr/share/lua50/libhttpd.lua
+
 update:
 	cvs -z3 update -A -d 2>/dev/null
