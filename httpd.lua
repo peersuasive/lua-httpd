@@ -28,15 +28,27 @@
 --
 --
 --  (If you wish to allow for fully qualified hosts simply add symbolic
--- links.)
+-- links to suit your hostnames.)
 --
---  *The* *code* *is* *not* *secure*.
+--
+--
+--  The code is NOT secure
+--  ----------------------
+--
+--  By that I mean that I won't promise any security.  I take the obvious
+-- step of filtering '/../' from incoming requests and Hostnames, but there
+-- may be other weaknesses.
+--
+--  Error messages are escaped by default, to prevent XSS attacks.
+--
+--  DOS attacks are trivial.
+--
 --
 -- Steve Kemp
 -- --
--- http://ww.steve.org.uk/
+-- http://www.steve.org.uk/
 --
--- $Id: httpd.lua,v 1.17 2005-10-30 01:47:10 steve Exp $
+-- $Id: httpd.lua,v 1.18 2005-10-30 15:24:05 steve Exp $
 
 
 --
@@ -382,8 +394,8 @@ end
 -----
 ---
 --
---  This is the start of the real code, now that the functions have been
--- defined we actuall execute from this point onwards.
+--  This is the start of the real code.  Now that our functions have been
+-- defined we actually execute from this point onwards.
 --
 ---
 ----
@@ -401,6 +413,9 @@ else
     --  The global MIME types file does not exist.
     --  Setup minimal defaults.
     --
+    print( "WARNING: /etc/mime.types could not be read." );
+    print( "         Running with minimal MIME types." );
+
     mime[ "html" ]  = "text/html";
     mime[ "txt"  ]  = "text/plain";
     mime[ "jpg"  ]  = "image/jpeg";
