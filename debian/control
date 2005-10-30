@@ -1,0 +1,19 @@
+Source: lua-httpd
+Section: interpreters
+Priority: optional
+Maintainer: Steve Kemp <steve@steve.org.uk>
+Build-Depends: debhelper (>= 3.0.24), liblua50-dev, liblualib50-dev
+Standards-Version: 3.6.0
+
+Package: lua-httpd
+Architecture: any
+Depends: ${shlibs:Depends}
+Recommends: lua50
+Description: TCP socket library for Lua 5.0
+ Luasocket provides a TCP/UDP socket library for Lua 5.0
+ .
+ Also provided are HTTP and SMTP implementations, a simple
+ FTP implementation and some URL parsing functions.
+ .
+ Luasocket supports blocking and non-blocking sockets
+ and also provides a select() interface to the language.

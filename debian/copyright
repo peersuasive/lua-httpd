@@ -1,0 +1,10 @@
+lua-httpd -- debianised by Steve Kemp <steve@steve.org.uk>
+
+lua-httpd can be found at http://www.steve.org.uk/Software/lua-httpd
+
+Upstream Author: Steve Kemp <steve@steve.org.uk>
+
+You are free to distribute this software under the terms of
+the GNU Lesser General Public License.
+On Debian systems, the complete text of the GNU Lesser General Public
+License can be found in the file `/usr/share/common-licenses/LGPL'.
