@@ -39,6 +39,8 @@
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
+
+#define __USE_BSD 1
 #include <string.h>
  
 #include <arpa/inet.h>
@@ -50,7 +52,7 @@
 #include <unistd.h>
  
 #define MYNAME		"libhttpd"
-#define VERSION	        "$Id: libhttpd.c,v 1.14 2005-10-30 01:02:49 steve Exp $"
+#define VERSION	        "$Id: libhttpd.c,v 1.15 2005-10-30 02:07:28 steve Exp $"
 
 
 
@@ -183,15 +185,18 @@ static int pConnect(lua_State *L)
 	port = lua_tonumber(L, 2);
     else
 	return( pusherror(L, "connect(string,int) incorrect second argument" ) );
+
     /* Get the host. */ 
     hp = gethostbyname(host);
-    memcpy((char *)hp->h_addr, (char *)&sa.sin_addr, hp->h_length);
+    bcopy((char *)hp->h_addr, (char *)&sa.sin_addr, hp->h_length);
     sa.sin_family = hp->h_addrtype;
     sa.sin_port = htons(port);
     sockfd = socket(hp->h_addrtype, SOCK_STREAM, 0);
 
     /* connect */
     ret = connect(sockfd, (struct sockaddr *)&sa, sizeof(sa));
+    if ( ret < 0 )
+	return( pusherror(L, "Failed to connect" ) );
 
     /* Return socket */
     lua_pushnumber(L, sockfd);
@@ -331,9 +336,9 @@ static int pWrite(lua_State *L)
     while (bytesSent < length)
     {
 	/* Send some */
-	int sent = send( sockfd, data + bytesSent, length - bytesSent, 0 );
+	int sent = write( sockfd, data + bytesSent, length - bytesSent);
 	
-	if (sent < 0)
+	if (sent <= 0)
 	{
 	    return( pusherror(L, "Problem writing to socket" ) );
 	}
