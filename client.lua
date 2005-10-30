@@ -5,14 +5,14 @@
 -- in 'libhttpd.so'.
 --
 --
--- $Id: client.lua,v 1.6 2005-10-30 01:47:10 steve Exp $
+-- $Id: client.lua,v 1.7 2005-10-30 02:07:03 steve Exp $
 
 
 --
 -- load the socket library
 --
 socket = require( "libhttpd" );
-print( "Loaded the socket library, version: \n  " .. socket.version );
+print( "Loaded the socket library, version:\n  " .. socket.version );
 
 
 --
@@ -20,6 +20,12 @@ print( "Loaded the socket library, version: \n  " .. socket.version );
 --
 sock = socket.connect( "localhost", 80 );
 
+if ( sock == nil ) then
+   error( "Socket failed to connect" );
+end
+
+
+print("Socket " .. sock );
 
 --
 --  Make a simple HTTP request.
