@@ -1,23 +1,101 @@
 <html>
- <head><title>Documentation for lua-httpd</title></head>
+ <head><title>Documentation for lua-httpd</title>
+ <link rel="stylesheet" type="text/css" href="style.css" media="screen" title="Default Layout">
+</head>
  <body>
- <h2>Lua-httpd documentation</h2>
- <p>This is the documentation for the <a href="http://www.steve.org.uk/Software/lua-httpd">Lua-httpd package</a>.</p>
- <p>The networking extension implements and exports the following primitives:</p>
+
+
+<div id="sidebar">
+<ul>
+<li><a href="index.html">Index</a></li>
+<li><a href="manual.html">API Documentation</a></li>
+<li><a href="examples.html">Example Code</a></li>
+</ul>
+</div>
+
+<div id="content">
+ <h2>API Documentation</h2>
+ <p>This page documents the API presented by the <tt>lua-httpd</tt> network extension library.</p>
+
+ <h3>Network Primitives Overview</h3>
+ <blockquote>
+ <p>The networking extension implements and exports the following networking primitives:</p>
  <dl>
- <dt><tt>bind()</tt></dt>
+ <dt><tt><a href="#bind">bind()</a></tt></dt>
  <dd><p>Listen upon a port to accept incomming connections.</p></dd>
- <dt><tt>accept()</tt></dt>
+ <dt><tt><a href="#accept">accept()</a></tt></dt>
  <dd><p>Accept a new client connection from a socket, which has previously been returned from a call to <tt>bind()</tt>.</p></dd>
- <dt><tt>connect()</tt></dt>
+ <dt><tt><a href="#connect">connect()</a></tt></dt>
  <dd><p>Make an outgoing TCP/IP connection to a remote host.</p></dd>
- <dt><tt>read()</tt></dt> 
+ <dt><tt><a href="#read">read()</a></tt></dt> 
  <dd><p>Read data from a connected socket.</p></dd>
- <dt><tt>write()</tt></dt>
+ <dt><tt><a href="#write">write()</a></tt></dt>
  <dd><p>Write data to a connected socket.</p></dd>
- <dt><tt>close()</tt></dt>
+ <dt><tt><a href="#close">close()</a></tt></dt>
  <dd><p>Close an open socket.</p></dd>
  </dl>
+ </blockquote>
+
+ <h3>Detailed API Documentation</h3>
+ <blockquote>
+ <p>Once the library has been loaded it will be available to you.  The following is an example of how to load the library:</p>
+<pre>
+-- Load the library
+socket = require( "libhttpd" );
+</pre>
+ <p>Once this is executed the various functions will be available to you prefixed with <tt>socket.</tt>.</p>
+
+ <h4 id="bind">bind()</h4>
+ <blockquote>
+  <p>Usage:</p>
+<pre>
+listener = socket.bind( port );
+</pre>
+  <p>This function returns a socket object which is listening upon the given port.  It will return <tt>nil</tt> in the case of any error.</p>
+  <p>Once you have bound a socket you should use the <a href="#accept"><tt>accept()</tt></a> call to actually handle an incoming connection.</p>
+ </blockquote>
+
+ <h4 id="accept">accept()</h4>
+ <blockquote>
+  <p>Usage:</p>
+<pre>
+incoming = socket.accept( listener );
+</pre>
+  <p>This function accepts an incoming connection from a socket which has been returned from the <a href="#bind"><tt>bind()</tt></a> function.  It will not return until a new client connects.</p>
+  </blockquote>
+
+ <h4 id="read">read()</h4>
+ <blockquote>
+  <p>Usage:</p>
+<pre>
+length, data = socket.read( incoming );
+</pre>
+  <p>This function will read and return data from a connected socket.  The returned values are the actual data and the lenght of that data.</p>
+  </blockquote>
+
+ <h4 id="write">write()</h4>
+ <blockquote>
+  <p>Usage:</p>
+<pre>
+socket.write( listener, data [, length ] );
+</pre>
+  <p>This function writes data to a connected socket.  You must specify the socket to write to and the data - optionally you may specify the size of the data to write.</p>
+  </blockquote>
+
+ <h4 id="close">close()</h4>
+ <blockquote>
+  <p>Usage:</p>
+<pre>
+socket.close( listener );
+</pre>
+  <p>This function closes an open socket - either one returned from <a href="#accept"><tt>accept()</tt></a>, or from <a href="#connect"><tt>connect()</tt></a>.</p>
+  </blockquote>
+
+
+ <h3>Sample Code</h3>
+ <blockquote>
  <p>Using the library should be simple for anybody familiar with  network programming under C, and <a href="examples.html">some example code</a> is available for study.</p>
+ </blockquote>
+</div>
  </body>
 </html>
