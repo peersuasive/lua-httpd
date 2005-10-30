@@ -48,7 +48,7 @@ install: $(OUT)
 	mkdir -p /usr/share/lua50
 	cp default.lua /usr/share/lua50/libhttpd.lua
 
-test: $(OUT)
+test:
 	lua httpd.lua
 
 
