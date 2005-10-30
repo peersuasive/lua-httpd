@@ -7,8 +7,7 @@ Standards-Version: 3.6.0
 
 Package: lua-httpd
 Architecture: any
-Depends: ${shlibs:Depends}
-Recommends: lua50
+Depends: ${shlibs:Depends}, lua50
 Description: TCP socket library for Lua 5.0
  Luasocket provides a TCP/UDP socket library for Lua 5.0
  .

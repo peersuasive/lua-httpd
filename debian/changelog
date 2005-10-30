@@ -1,5 +1,12 @@
+lua-httpd (0.4-2) stable; urgency=low
+
+  * Require lua50 to be installed.
+
+ -- Steve Kemp <steve@steve.org.uk>  Sun, 30 Oct 2005 03:09:10 +0000
+
 lua-httpd (0.4-1) stable; urgency=low
 
   * Initial version of Debian package.
 
- -- Steve Kemp <steve@steve.org.uk>  Sun, 30 Oct 2005 02:41:55 +0000
+-- Steve Kemp <steve@steve.org.uk>  Sun, 30 Oct 2005 02:41:55 +0000
+
