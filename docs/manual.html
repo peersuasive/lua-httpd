@@ -1,0 +1,23 @@
+<html>
+ <head><title>Documentation for lua-httpd</title></head>
+ <body>
+ <h2>Lua-httpd documentation</h2>
+ <p>This is the documentation for the <a href="http://www.steve.org.uk/Software/lua-httpd">Lua-httpd package</a>.</p>
+ <p>The networking extension implements and exports the following primitives:</p>
+ <dl>
+ <dt><tt>bind()</tt></dt>
+ <dd><p>Listen upon a port to accept incomming connections.</p></dd>
+ <dt><tt>accept()</tt></dt>
+ <dd><p>Accept a new client connection from a socket, which has previously been returned from a call to <tt>bind()</tt>.</p></dd>
+ <dt><tt>connect()</tt></dt>
+ <dd><p>Make an outgoing TCP/IP connection to a remote host.</p></dd>
+ <dt><tt>read()</tt></dt> 
+ <dd><p>Read data from a connected socket.</p></dd>
+ <dt><tt>write()</tt></dt>
+ <dd><p>Write data to a connected socket.</p></dd>
+ <dt><tt>close()</tt></dt>
+ <dd><p>Close an open socket.</p></dd>
+ </dl>
+ <p>Using the library should be simple for anybody familiar with  network programming under C, and <a href="examples.html">some example code</a> is available for study.</p>
+ </body>
+</html>

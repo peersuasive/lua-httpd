@@ -1,0 +1,39 @@
+<html>
+ <head><title>Example Code using lua-httpd</title></head>
+ <body>
+ <h2>Example Code using lua-httpd</h2>
+ <blockquote>
+ <p>Here are some simple samples of code demonstrating how the library may be used.</p>
+ <p>The library includes a couple of small samples of its own which have better error handling, and more complete functionality.  However these samples are simpler for demonstration purposes.</p>
+ </blockquote>
+
+
+ <h3>Simple Server</h3>
+
+
+
+ <h3>Simple Client</h3>
+ <p>The following implements a simple client, connecting to http://localhost/
+ and retrieving the headers of a page request.</p>
+<pre>
+  -- Load the library
+  socket = require( "libhttpd" );
+
+  -- Make a connection to http://localhost/
+  sock = socket.connect( "localhost", 80 );
+
+  -- Send the request.
+  socket.write( sock, "GET / HTTP/1.0\n\n" );
+
+  -- Read the response and print it
+  repeat
+     len,line = socket.read( sock )
+     print( line );
+  until len <= 0
+
+  -- Close up
+  socket.close( sock );
+</pre>
+<p>You may <a href="example-client.lua">view this file</a>.</p>
+
+</body></html>
