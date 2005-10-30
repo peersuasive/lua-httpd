@@ -2,8 +2,9 @@
 lua-httpd
 ---------
 
-  This package contains a simple networking library for Lua 5.0 which
- is implemented and exported from a C shared library (.so).
+  This package contains a simple networking extension library for
+ Lua 5.0 which is implemented and exported from a C shared library
+ (.so).
 
   It may be installed system-wide and used by your Lua scripts with
  ease.
@@ -56,49 +57,32 @@ print ( sockets.version .. " loaded OK" );
 Demonstration Code
 ------------------
 
-    httpd.lua  - A simple HTTP server written in Lua using the primitives.
-    client.lua - A simple HTTP client written in Lua using the primitives.
+  The package comes complete with several small examples inside the
+ API documentation which you can find beneath the docs/ directory.
 
 
+  More complete sample code is included:
+
+  httpd.lua
+  ---------
+
+   A simple HTTP server written in Lua using the primitives.  This
+  server understands virtual hosts, and will serve using your systems
+  installed MIME types database.
+
+   After you've installed the library you may execute the HTTPD by
+  running "make test" - this will serve the content beneath ./vhosts
+  to clients.
+
+   To stop the server fetch:
+
+		http://localhost:4444/finish
 
 
-libhttpd.c
-----------
+  client.lua
+  ----------
 
-  This function exports simple wrappers to lua of the following
- networking primitives:
-
-	bind();
-	accept();
-	connect();
-	read();
-	write();
-	close();
-
-  These are sufficient to write simple HTTP servers in Lua.
-
-
-
-httpd.lua
----------
-
-  This is an simple HTTP server which supports multiple virtual hosts.
-
-  By default it will serve requests for files located beneath ./vhosts,
- each directory beneath there will be taken as a hostname to serve.
-
-  The server will bind to port 4444 by default.
-
-  The request to close it is:
-
-	http://localhost:4444/finish
-
-
-client.lua
-----------
-
-  This is a trivial HTTP client which will connect to
- http://localhost:80/ and output the index page.
+   A very simple HTTP client written in Lua using the primitives.
 
 
 
