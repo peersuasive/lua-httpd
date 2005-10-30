@@ -2,16 +2,51 @@
 lua-httpd
 ---------
 
-  This directory contains four things:
+  This package contains a simple networking library for Lua 5.0 which
+ is implemented and exported from a C shared library (.so).
+
+  It may be installed system-wide and used by your Lua scripts with
+ ease.
 
 
-    libhttpd.c - Some networking functions callable from Lua.
-    httpd.lua  - A simple HTTP server written in Lua using them.
-    client.lua - A simple HTTP client.
-    Makefile   - To build ("make") and execute ("make test")
 
- (Before building make sure you run:
-	apt-get install liblualib50-dev liblua50-dev )
+Installation
+------------
+
+  Compile and install the library with
+
+	make
+
+	make install
+
+  This will install the library into the directory /usr/lib/lua/5.0 
+ along with a helper package into /usr/share/lua50.
+
+
+
+Usage
+-----
+
+  Once the library has been installed you can use it from your Lua
+ scripts as follows:
+
+
+[------- Example ------]
+#!/usr/bin/lua
+
+sockets = require "libhttpd";
+
+print ( sockets.version .. " loaded OK" );
+[ ----- ]
+
+
+
+Demonstration Code
+------------------
+
+    httpd.lua  - A simple HTTP server written in Lua using the primitives.
+    client.lua - A simple HTTP client written in Lua using the primitives.
+
 
 
 
@@ -61,6 +96,8 @@ License
   This code is distributed under the terms of the GNU General
  Lesser Public License.
 
+
+
 Steve
 --
-
+http://www.steve.org.uk/
