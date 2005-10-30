@@ -1,6 +1,6 @@
 /* CSS for Debian-Administration.org.
  * 
- * $Id: style.css,v 1.1 2005-10-30 16:09:31 steve Exp $
+ * $Id: style.css,v 1.2 2005-10-30 16:22:21 steve Exp $
  *
  */
 
@@ -71,4 +71,24 @@ div#content pre {
         border:         solid;
         border-width:   thin;
 
+}
+
+#footer {
+        color: black;
+        font-size: 92%;
+        text-align: center;
+        line-height: 1.25em;
+        margin: 0;
+        padding: 1em 4mm 1em 4mm;
+        clear: both;
+        border-top: 1px solid rgb(216,210,195);
+}
+
+#footer div {
+        margin: 0;
+        padding: 0 0 1ex 0;
+}
+
+#footer p {
+        text-align: right;
 }
