@@ -63,7 +63,7 @@
 -- --
 -- http://www.steve.org.uk/
 --
--- $Id: httpd.lua,v 1.26 2005-10-31 07:07:42 steve Exp $
+-- $Id: httpd.lua,v 1.27 2005-10-31 07:25:54 steve Exp $
 
 
 --
@@ -279,6 +279,35 @@ function processConnection( root, listener )
 end
 
 
+--
+--  Attempt to serve the given path to the given client
+--
+function handleDirectory( client, path, request )
+ 
+     a = socket.readdir( path );
+
+    socket.write( client, "HTTP/1.0 200 OK\r\n" );
+    socket.write( client, "Server: lua-httpd " .. socket.version .. "\r\n" );
+    socket.write( client, "Content-type: text/html\r\n" );
+    socket.write( client, "Connection: close\r\n\r\n" );
+
+    msg = "";
+    msg = msg .. "<html><head><title>Files in " .. request .. "</title></head>";
+    msg = msg .. "<body><h2>Files in " .. request .. "</h2>\n";
+    msg = msg .. "<ul>\n";
+
+    for i=0,table.getn(a) do
+         msg = msg .. "<li><a href=\"" .. a[i] .. "\">" .. a[i] .. "</a></li>\n";
+    end
+
+    msg = msg .. "</ul></body></html>\n";
+    socket.write( client, msg );
+
+    return string.len(msg) ;
+
+end
+
+
 
 --
 --  Attempt to serve the given path to the given client
@@ -289,24 +318,44 @@ function handleRequest( root, host, path, client )
     --
     file = path;
 
-    --
-    -- Add a trailing "index.html" to paths ending in /
-    --
-    if ( string.endsWith( file, "/" ) ) then  
-        file = file .. "index.html";
-    end
 
     --
     --  File must be beneath the vhost root.
     --
     file = root .. host .. "/htdocs" .. file ;
 
-print( "File" .. file );
     --
     --  Attempt to sanitize the input Virtual Host + requested path.
     --
     file = string.strip( file );
 
+
+    --
+    -- Add a trailing "index.html" to paths ending in / if such
+    -- a file exists.
+    --
+    -- Otherwise if it is a directory then serve it.
+    --
+    if ( string.endsWith( file, "/" ) ) then  
+        print("Request ends with '/'" .. file );
+        tmp = file .. "index.html";
+        if ( fileExists( tmp ) ) then
+           print("Directory index exists : " .. tmp);
+           file = tmp;
+        else
+           if ( socket.is_dir( file ) ) then
+               print( "The given path is a directory : " .. file );
+               size = handleDirectory( client, file, path ) ;
+               socket.close( client );
+               return size, "200";
+           else
+               print( "Nota directory : " .. file );
+           end
+        end
+    end
+
+
+ 
 
     --
     -- Open the file and return an error if it fails.
@@ -326,12 +375,15 @@ print( "File" .. file );
        ext = "html";   -- HACK
     end
     
+    type = mime[ext];
+    if ( type == nil ) then type = 'text/plain' ; end;
+
     --
     -- Send out the header.
     --
     socket.write( client, "HTTP/1.0 200 OK\r\n" );
     socket.write( client, "Server: lua-httpd " .. socket.version .. "\r\n" );
-    socket.write( client, "Content-type: " .. mime[ ext ]  .. "\r\n" );
+    socket.write( client, "Content-type: " .. type  .. "\r\n" );
     socket.write( client, "Connection: close\r\n\r\n" );
 
     --
