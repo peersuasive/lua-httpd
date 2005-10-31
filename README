@@ -29,28 +29,9 @@ Usage
 -----
 
   Once the library has been installed you can use it from your Lua
- scripts as follows:
+ scripts easily.
 
-
-[------- Example ------]
-#!/usr/bin/lua
-
-sockets = require "libhttpd";
-
-print ( sockets.version .. " loaded OK" );
-[ ----- ]
-
-
-  If you do not wish to install the library system-wide you can
- instead use:
-
-[------- Example ------]
-#!/usr/bin/lua
-
-socket = assert(loadlib("./libhttpd.so", "luaopen_libhttpd"))()
-
-print ( sockets.version .. " loaded OK" );
-[ ----- ]
+  Please see the documentation included in docs/ for details.
 
 
 

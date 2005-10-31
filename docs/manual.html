@@ -15,7 +15,26 @@
 
 <div id="content">
  <h2>API Documentation</h2>
- <p>This page documents the API presented by the <tt>lua-httpd</tt> network extension library.</p>
+ <p>This page documents the functions presented by the <tt>lua-httpd</tt> network extension library, along with some simple notes on how to load the library and start using it.</p>
+
+
+ <h3>Using the Extension</h3> 
+ <blockquote>
+ <p>Once the library has been installed upon the system it will be automatically available for use by all your Lua scripts.</p>
+ <p>This is the preferred way to load the library and gain access to all the functions contained within it:</p>
+<pre>
+-- Load the library from the system installation
+socket = require( "libhttpd" );
+</pre>
+ <p>If you choose not to install the library system-wide you may instead load it via something like this:</p>
+<pre>
+-- Load the library from the current directory.
+socket = assert(loadlib("./libhttpd.so", "luaopen_libhttpd"))()
+
+-- Test it worked.
+print ( sockets.version .. " loaded OK" );
+</pre>
+ </blockquote>
 
  <h3>Network Primitives Overview</h3>
  <blockquote>
@@ -52,13 +71,6 @@
 
  <h3>Detailed API Documentation</h3>
  <blockquote>
- <p>Once the library has been loaded it will be available to you.  The following is an example of how to load the library:</p>
-<pre>
--- Load the library
-socket = require( "libhttpd" );
-</pre>
- <p>Once this is executed the various functions will be available to you prefixed with <tt>socket.</tt>.</p>
-
  <h4 id="bind">bind()</h4>
  <blockquote>
   <p>Usage:</p>
