@@ -63,7 +63,7 @@
 -- --
 -- http://www.steve.org.uk/
 --
--- $Id: httpd.lua,v 1.28 2005-10-31 07:27:13 steve Exp $
+-- $Id: httpd.lua,v 1.29 2005-10-31 07:41:16 steve Exp $
 
 
 --
@@ -301,7 +301,11 @@ function handleDirectory( client, path, request )
     msg = msg .. "<ul>\n";
 
     for i=0,table.getn(a) do
-         msg = msg .. "<li><a href=\"" .. a[i] .. "\">" .. a[i] .. "</a></li>\n";
+         item = a[i];
+         if ( socket.is_dir( path .. "/" .. item ) ) then
+                item = item .. "/";
+         end
+         msg = msg .. "<li><a href=\"" .. item .. "\">" .. item .. "</a></li>\n";
     end
 
     msg = msg .. "</ul></body></html>\n";
