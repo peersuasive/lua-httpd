@@ -40,9 +40,12 @@ install: build
 	cp default.lua debian/lua-httpd/usr/share/lua50/libhttpd.lua
 
 	mkdir debian/lua-httpd/usr/share/doc/lua-httpd/examples
+	mkdir debian/lua-httpd/usr/share/doc/lua-httpd/docs
+	cp README debian/lua-httpd/usr/share/doc/lua-httpd/
 	cp httpd.lua debian/lua-httpd/usr/share/doc/lua-httpd/examples
 	cp client.lua debian/lua-httpd/usr/share/doc/lua-httpd/examples
 	cp -R vhosts debian/lua-httpd/usr/share/doc/lua-httpd/examples
+	cp docs/* debian/lua-httpd/usr/share/doc/lua-httpd/docs
 
 
 
