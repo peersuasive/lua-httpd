@@ -48,7 +48,7 @@
 -- --
 -- http://www.steve.org.uk/
 --
--- $Id: httpd.lua,v 1.22 2005-10-31 01:41:25 steve Exp $
+-- $Id: httpd.lua,v 1.23 2005-10-31 06:00:39 steve Exp $
 
 
 --
@@ -234,7 +234,7 @@ function processConnection( root, listener )
     -- 
     -- Note: The logging does not write the name of the virtual host.
     --
-    logAccess( ip, path, code, size, agent, referer, major, minor );
+    logAccess( root, host, ip, path, code, size, agent, referer, major, minor );
 
 
     if ( running == 0 ) then
@@ -268,8 +268,9 @@ function handleRequest( root, host, path, client )
     --
     --  File must be beneath the vhost root.
     --
-    file = root .. host .. file ;
+    file = root .. host .. "/htdocs" .. file ;
 
+print( "File" .. file );
     --
     --  Attempt to sanitize the input Virtual Host + requested path.
     --
@@ -422,13 +423,24 @@ end
 --
 -- Log an access request.
 --
-function logAccess( ip, request, status, size, agent, referer, major, minor )
+function logAccess( root, host, ip, request, status, size, agent, referer, major, minor )
     date = os.date("%m/%b/%Y:%H:%M:%S +0000");
 
     --
     -- Format the logging line.
     --
     log  = string.format( '%s - - [%s] "GET %s HTTP/%s.%s" %s %s "%s" "%s"', ip, date, request, major, minor, status, size, referer, agent );
+
+    logfile = root ..  host .. "/logs/access.log"
+
+    --
+    -- Open logfile for appending.
+    --
+    file = io.open( logfile , "a" );
+    if ( file ~= nil ) then
+        file:write( log .. "\n" );
+        file:close();
+    end
 
     print( log );
 end
