@@ -63,7 +63,7 @@
 -- --
 -- http://www.steve.org.uk/
 --
--- $Id: httpd.lua,v 1.25 2005-10-31 06:36:35 steve Exp $
+-- $Id: httpd.lua,v 1.26 2005-10-31 07:07:42 steve Exp $
 
 
 --
@@ -222,19 +222,18 @@ function processConnection( root, listener )
     --
     --  Is this a host that we're dealing with?
     --
-    --  For this code to work we need the "os.stat" function, which
-    -- can be found at:
+    --  For this code to work we would ideally use the "os.stat" patch
+    -- against Lua 5.0 which can be found at:
     --
     --     http://lua-users.org/wiki/PeterShook
     --
---[[
-    info = os.stat( root .. host );
-    if ( ( info ~= nil ) and ( info.dir ~= nil ) )then
-       print( "Directory: " .. root .. host );
-    else
+    --  Instead we use our own "is_dir" function inside the socket
+    -- library.
+    --
+    info = socket.is_dir( root .. host );
+    if ( not info ) then
        host = 'default';
     end
-]]--
 
     --
     -- If the request was for '/finish' then terminate ourselves
