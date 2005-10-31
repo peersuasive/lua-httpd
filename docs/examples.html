@@ -21,8 +21,41 @@
 
 
  <h3>Simple Server</h3>
+ <p>The following code implements a simple single-threaded "echo server", which will accept connections upon a port and merely echo back everything it recieves to the connected client.</p>
+<pre>
+#!/usr/bin/lua50
 
+-- Load the library
+socket = require( "libhttpd" );
 
+-- Start listening upon a socket
+listener = socket.bind( 9999 );
+
+-- Show instructions!
+print( "Echo server running on port 9999" );
+
+-- Loop waiting for connections
+while true do
+
+   -- Accept a new connection.
+   client,ip = socket.accept( listener );
+
+   -- Read from the client.
+   length, data = socket.read(client);
+   
+   while( length > 0 ) do 
+       -- Echo data back to client.
+       socket.write( client, data );
+
+       length, data = socket.read( client );
+   end
+
+   -- Now close the socket.
+   socket.close( client );
+
+end
+</pre>
+<p>(You may download <a href="example-server.lua">example-server.lua</a>.)</p>
 
  <h3>Simple Client</h3>
  <p>The following implements a simple client, connecting to http://localhost/
@@ -46,7 +79,7 @@
   -- Close up
   socket.close( sock );
 </pre>
-<p>You may <a href="example-client.lua">view this file</a>.</p>
+<p>(You may download <a href="example-client.lua">example-client.lua</a>.)</p>
 
 
  <h3>Working With Files</h3>
@@ -104,7 +137,7 @@ end
 -- Now show the current directory recursively
 showPath( ".", 1 );
 </pre>
-<p>(You can <a href="example-tree.lua">download this file</a>.)</p>
+<p>(You may download <a href="example-tree.lua">example-tree.lua</a>.)</p>
 <p>Sample usage looks like this:</p>
 <pre>
 skx@lappy:~/cvs/lua-httpd$ lua ./docs/example-tree.lua  | head
