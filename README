@@ -78,6 +78,14 @@ Demonstration Code
 
 		http://localhost:4444/finish
 
+   The vhosts directory will contain a sub-directory for each virtual
+  host you wish to serve, for example:
+
+		./vhosts/
+		./vhosts/my-host-name/
+		./vhosts/my-host-name/htdocs  - The web root
+		./vhosts/my-host-name/logs    - Where logfiles are saved
+
 
   client.lua
   ----------
