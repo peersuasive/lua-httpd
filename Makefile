@@ -13,9 +13,12 @@ $(OUT): libhttpd.c
 
 clean:
 	-find . -name '*~' -exec rm \{\} \;
+	-find . -name '.#*' -exec rm \{\} \;
 	-rm -f libhttpd.so libhttpd.o
 	-rm -f build-stamp
 	-if [ -d debian/lua-httpd ]; then rm -rf debian/lua-httpd; fi
+	-if [ -d tmp ]; then rm -rf tmp; fi
+	-if [ -e debian/files ]; then rm -f debian/files; fi
 	-find . -name 'access.log' -exec rm \{\} \;
 
 
@@ -28,6 +31,7 @@ debian: clean dist
 	mv $(BASE)-$(VERSION).tar.gz tmp/$(BASE)_$(VERSION).orig.tar.gz
 	cd tmp && tar -zxvf $(BASE)_$(VERSION).orig.tar.gz
 	find tmp/ -name CVS -exec rm -rf \{\} \;
+	find tmp/ -name .cvsignore -exec rm -rf \{\} \;
 	cd tmp/$(BASE)-$(VERSION) && debuild -sa
 	mv tmp/$(BASE)_* .
 	rm -rf tmp/
