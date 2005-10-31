@@ -48,7 +48,7 @@
 -- --
 -- http://www.steve.org.uk/
 --
--- $Id: httpd.lua,v 1.21 2005-10-31 01:25:56 steve Exp $
+-- $Id: httpd.lua,v 1.22 2005-10-31 01:41:25 steve Exp $
 
 
 --
@@ -211,6 +211,7 @@ function processConnection( root, listener )
         running = 0;
 
         socket.write( client, "HTTP/1.0 200 OK\r\n" );
+        socket.write( client, "Server: lua-httpd " .. socket.version .. "\r\n" );
         socket.write( client, "Content-type: text/html\r\n" );
         socket.write( client, "Connection: close\r\n\r\n" );
         socket.write( client, "<html><head><title>Server Terminated</title></head>" );
@@ -297,6 +298,7 @@ function handleRequest( root, host, path, client )
     -- Send out the header.
     --
     socket.write( client, "HTTP/1.0 200 OK\r\n" );
+    socket.write( client, "Server: lua-httpd " .. socket.version .. "\r\n" );
     socket.write( client, "Content-type: " .. mime[ ext ]  .. "\r\n" );
     socket.write( client, "Connection: close\r\n\r\n" );
 
@@ -320,6 +322,7 @@ end
 --
 function sendError( client, status, str )
     message = "HTTP/1.0 " .. status .. " OK\r\n" ;
+    message = message .. "Server: lua-httpd " .. socket.version .. "\r\n";
     message = message .. "Content-type: text/html\r\n";
     message = message .. "Connection: close\r\n\r\n" ;
     message = message .. "<html><head><title>Error</title></head>" ;
