@@ -63,7 +63,7 @@
 -- --
 -- http://www.steve.org.uk/
 --
--- $Id: httpd.lua,v 1.27 2005-10-31 07:25:54 steve Exp $
+-- $Id: httpd.lua,v 1.28 2005-10-31 07:27:13 steve Exp $
 
 
 --
@@ -99,6 +99,10 @@ function start_server( port, root )
     --  Bind a socket to the given port
     --
     local listener = socket.bind( port );
+
+    if ( listener == nil ) then
+       error("Error in bind()");
+    end
 
     --
     --   Print some status messages.
