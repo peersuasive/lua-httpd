@@ -48,7 +48,7 @@
 -- --
 -- http://www.steve.org.uk/
 --
--- $Id: httpd.lua,v 1.19 2005-10-30 15:27:54 steve Exp $
+-- $Id: httpd.lua,v 1.20 2005-10-31 01:16:45 steve Exp $
 
 
 --
@@ -172,6 +172,14 @@ function processConnection( root, listener )
 
 
     --
+    -- If there was no "Host:" header then use "default".
+    --
+    if ( host == nil ) then
+        host = "default";
+    end
+
+
+    --
     -- If the request was for '/finish' then terminate ourselves
     --
     if ( path == "/finish" ) then
@@ -246,6 +254,7 @@ function handleRequest( root, host, path, client )
     -- Open the file and return an error if it fails.
     --    
     if ( fileExists( file ) == false ) then 
+
         size = sendError( client, 404, "File not found " .. urlEncode( path ) );
         return size, "404";
     end;
