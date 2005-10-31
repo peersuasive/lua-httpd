@@ -48,7 +48,7 @@
 -- --
 -- http://www.steve.org.uk/
 --
--- $Id: httpd.lua,v 1.20 2005-10-31 01:16:45 steve Exp $
+-- $Id: httpd.lua,v 1.21 2005-10-31 01:25:56 steve Exp $
 
 
 --
@@ -120,17 +120,22 @@ function processConnection( root, listener )
     --
     client,ip = socket.accept( listener );
 
-    found   = 0;
-    size    = 0;
-    code    = 0;
-    request = "";
+    found   = 0;  -- Found the end of the HTTP headers?
+    chunk   = 0;  -- Count of data read from client socket
+    size    = 0;  -- Total size of incoming request.
+    code    = 0;  -- Status code we send to the client
+    request = ""; -- Request body read from client.
 
 
     --
     --  Read in a response from the client, terminating at the first
     -- '\r\n\r\n' line - this is the end of the HTTP header request.
     --
-    while( found == 0 ) do
+    --  Also break out of this loop if we read ten packets of data
+    -- from the client but didn't manage to find a HTTP header end.
+    -- This should help protect us from DOSes.
+    --
+    while ( ( found == 0 ) and ( chunk < 10 ) ) do
 	length, data = socket.read(client);
         if ( length < 1 ) then
 	    found = 1;
@@ -143,6 +148,8 @@ function processConnection( root, listener )
 	if ( position ~= nil )  then
 	    found = 1;
 	end
+
+        chunk = chunk + 1;
     end
 
 
@@ -154,7 +161,25 @@ function processConnection( root, listener )
     --
     -- Find the requested path.
     --
-    _, _, path, major, minor  = string.find(request, "GET (.+) HTTP/(%d).(%d)");
+    _, _, method, path, major, minor  = string.find(request, "([A-Z]+) (.+) HTTP/(%d).(%d)");
+
+    --
+    -- We only handle GET requests.
+    --
+    if ( method ~= "GET" ) then
+        error = "Method not implemented";
+
+        if ( method == nil ) then
+	    error = error .. ".";
+        else
+            error = error .. ": " .. urlEncode( method );
+        end
+
+        size = sendError( client, 501, error );
+        socket.close( client );
+        return size, "501";
+    end
+
 
     --
     -- Decode the requested path.
@@ -254,8 +279,8 @@ function handleRequest( root, host, path, client )
     -- Open the file and return an error if it fails.
     --    
     if ( fileExists( file ) == false ) then 
-
-        size = sendError( client, 404, "File not found " .. urlEncode( path ) );
+        size = sendError( client, 404,"File not found " .. urlEncode( path ) );
+        socket.close( client );
         return size, "404";
     end;
 
