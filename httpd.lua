@@ -18,17 +18,31 @@
 --    ./vhosts/
 --
 --    ./vhosts/bob/
---    ./vhosts/bob/index.html        [etc]
+--    ./vhosts/bob/htdocs/
+--    ./vhosts/bob/htdocs/index.html    [etc]
+--    ./vhosts/bob/logs/
 --
 --    ./vhosts/lappy/
---    ./vhosts/lappy/index.html      [etc]
+--    ./vhosts/lappy/htdocs/
+--    ./vhosts/lappy/htdocs/index.html  [etc]
+--    ./vhosts/lappy/logs/
 --
 --    ./vhosts/localhost/
---    ./vhosts/localhost/index.html  [etc]
+--    ./vhosts/localhost/htdocs/
+--    ./vhosts/localhost/htdocs/index.html  [etc]
+--    ./vhosts/localhost/logs/
 --
 --
 --  (If you wish to allow for fully qualified hosts simply add symbolic
 -- links to suit your hostnames.)
+--
+--
+--  If a request arrives for a virtual host which you are not serving
+-- then it will be passed to the faux server "default".  Simply create
+-- a symbolic link to the server you wish to be your default host:
+--
+--    cd ./vhosts
+--    ln -s lappy default
 --
 --
 --
@@ -41,14 +55,15 @@
 --
 --  Error messages are escaped by default, to prevent XSS attacks.
 --
---  DOS attacks are trivial.
+--  DOS attacks might be possible, although again the obvious cases
+-- are covered.
 --
 --
 -- Steve Kemp
 -- --
 -- http://www.steve.org.uk/
 --
--- $Id: httpd.lua,v 1.23 2005-10-31 06:00:39 steve Exp $
+-- $Id: httpd.lua,v 1.24 2005-10-31 06:10:48 steve Exp $
 
 
 --
