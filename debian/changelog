@@ -1,3 +1,12 @@
+lua-httpd (0.5-1) stable; urgency=low
+
+  * New upstream release.
+    - Added some simple filesystem primitives.
+    - Install API documentation.
+    - Install examples.
+
+ -- Steve Kemp <steve@steve.org.uk>  Mon, 31 Oct 2005 17:21:05 +0000
+
 lua-httpd (0.4-2) stable; urgency=low
 
   * Require lua50 to be installed.

@@ -1,5 +1,5 @@
 DIST_PREFIX = /tmp
-VERSION     = 0.4
+VERSION     = 0.5
 BASE        = lua-httpd
 
 
