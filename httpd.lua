@@ -63,7 +63,7 @@
 -- --
 -- http://www.steve.org.uk/
 --
--- $Id: httpd.lua,v 1.30 2005-10-31 17:00:18 steve Exp $
+-- $Id: httpd.lua,v 1.31 2005-10-31 17:08:22 steve Exp $
 
 
 --
@@ -526,6 +526,8 @@ function logAccess( root, host, ip, request, status, size, agent, referer, major
     if ( file ~= nil ) then
         file:write( log .. "\n" );
         file:close();
+    else
+        print( "WARNING : Unable to open logfile for writing : " .. logfile );
     end
 
     print( log );
