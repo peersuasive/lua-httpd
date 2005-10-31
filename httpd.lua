@@ -63,7 +63,7 @@
 -- --
 -- http://www.steve.org.uk/
 --
--- $Id: httpd.lua,v 1.24 2005-10-31 06:10:48 steve Exp $
+-- $Id: httpd.lua,v 1.25 2005-10-31 06:36:35 steve Exp $
 
 
 --
@@ -218,6 +218,23 @@ function processConnection( root, listener )
         host = "default";
     end
 
+
+    --
+    --  Is this a host that we're dealing with?
+    --
+    --  For this code to work we need the "os.stat" function, which
+    -- can be found at:
+    --
+    --     http://lua-users.org/wiki/PeterShook
+    --
+--[[
+    info = os.stat( root .. host );
+    if ( ( info ~= nil ) and ( info.dir ~= nil ) )then
+       print( "Directory: " .. root .. host );
+    else
+       host = 'default';
+    end
+]]--
 
     --
     -- If the request was for '/finish' then terminate ourselves
