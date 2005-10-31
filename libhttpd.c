@@ -52,7 +52,7 @@
 #include <unistd.h>
  
 #define MYNAME		"libhttpd"
-#define VERSION	        "$Id: libhttpd.c,v 1.15 2005-10-30 02:07:28 steve Exp $"
+#define VERSION	        "$Id: libhttpd.c,v 1.16 2005-10-31 01:38:17 steve Exp $"
 
 
 
@@ -63,13 +63,26 @@
 
 /*
  * Find and return the version identifier from our CVS marker.
+ * The memory returned is static.
  */
 char * getVersion( )
 {
     char *start  = NULL;
     char *end    = NULL;
-    char *memory = NULL;
     int length   = 0;
+    char *prolog = "Release " RELEASE " CVS ID v";
+
+    static char marker[128] = {'\0'};
+
+    /*
+     * If we have already calculated the revision information
+     * then return it.
+     */
+    if ( strlen( marker ) > 0 )
+    {
+	return( marker );
+    }
+
 
     start = strstr( VERSION, ",v " );
     if ( start == NULL )
@@ -84,16 +97,14 @@ char * getVersion( )
 	return NULL;
 
 
-    /* Allocate, and zero, enough memory for the result. */
-    length = end - start;
-    memory = (char *)malloc( length + 1 );
-    memset( memory, '\0', length+1);
-	
+    /* The length of the version marker revision ID. */
+    length  = end - start;
 
-    /* Copy in the version number. */
-    strncpy( memory, start, length );
-	
-    return( memory );
+    /* Add in the prolog + revision information */
+    strncpy( marker, prolog, strlen( prolog ) );
+    strncat( marker, start, length );
+
+    return( marker );
 }
 
 
@@ -403,9 +414,6 @@ LUALIB_API int luaopen_libhttpd (lua_State *L)
     lua_pushliteral(L,"version");
     lua_pushstring(L, version );
     lua_settable(L,-3);
-
-    /* Free version */
-    free( version );
 
     return 1;
 }
