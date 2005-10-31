@@ -15,6 +15,7 @@ clean:
 	-find . -name '*~' -exec rm \{\} \;
 	-rm -f libhttpd.so libhttpd.o
 	-rm -f build-stamp
+	-if [ -d debian/lua-httpd ]; then rm -rf debian/lua-httpd; fi
 
 
 diff:
