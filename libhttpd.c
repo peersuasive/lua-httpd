@@ -55,7 +55,7 @@
 #include <unistd.h>
  
 #define MYNAME		"libhttpd"
-#define VERSION	        "$Id: libhttpd.c,v 1.17 2005-10-31 07:07:19 steve Exp $"
+#define VERSION	        "$Id: libhttpd.c,v 1.18 2005-10-31 16:50:54 steve Exp $"
 
 
 
@@ -422,7 +422,7 @@ static int pIsFile(lua_State *L)
     if (lua_isstring(L, 1))
 	fileName = lua_tostring(L, 1);
     else
-	return( pusherror(L, "is_dir(string)" ) );
+	return( pusherror(L, "is_file(string)" ) );
 
     if (stat(fileName, &st) == 0) 
 	lua_pushboolean(L, S_ISREG(st.st_mode) );
