@@ -8,5 +8,4 @@ lua-httpd (0.4-1) stable; urgency=low
 
   * Initial version of Debian package.
 
--- Steve Kemp <steve@steve.org.uk>  Sun, 30 Oct 2005 02:41:55 +0000
-
+ -- Steve Kemp <steve@steve.org.uk>  Sun, 30 Oct 2005 02:41:55 +0000
