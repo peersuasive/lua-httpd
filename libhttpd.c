@@ -47,12 +47,15 @@
 #include <sys/types.h>
 #include <netinet/in.h>
 #include <sys/socket.h>
+#include <sys/stat.h>
+#include <dirent.h>
+
 #include <netdb.h>
 
 #include <unistd.h>
  
 #define MYNAME		"libhttpd"
-#define VERSION	        "$Id: libhttpd.c,v 1.16 2005-10-31 01:38:17 steve Exp $"
+#define VERSION	        "$Id: libhttpd.c,v 1.17 2005-10-31 07:07:19 steve Exp $"
 
 
 
@@ -106,8 +109,6 @@ char * getVersion( )
 
     return( marker );
 }
-
-
 
 
 /**
@@ -384,6 +385,106 @@ static int pClose(lua_State *L)
 
 
 /**
+ * Test to see if the given file/path is a directory.
+ * @param L The lua intepreter object.
+ * @return The number of results to be passed back to the calling Lua script.
+ */
+static int pIsDir(lua_State *L)
+{
+    const char *fileName = NULL;
+    struct stat st;
+
+    if (lua_isstring(L, 1))
+	fileName = lua_tostring(L, 1);
+    else
+	return( pusherror(L, "is_dir(string)" ) );
+
+    if (stat(fileName, &st) == 0) 
+	lua_pushboolean(L, S_ISDIR(st.st_mode) );
+    else
+	return( pusherror(L, "stat failed!" ) );
+
+    return 1;
+}
+
+
+
+/**
+ * Test to see if the given file/path is a file.
+ * @param L The lua intepreter object.
+ * @return The number of results to be passed back to the calling Lua script.
+ */
+static int pIsFile(lua_State *L)
+{
+    const char *fileName = NULL;
+    struct stat st;
+
+    if (lua_isstring(L, 1))
+	fileName = lua_tostring(L, 1);
+    else
+	return( pusherror(L, "is_dir(string)" ) );
+
+    if (stat(fileName, &st) == 0) 
+	lua_pushboolean(L, S_ISREG(st.st_mode) );
+    else
+	return( pusherror(L, "stat failed!" ) );
+
+    return 1;
+}
+
+
+
+/**
+ * Return a table of all the directory entries in the given dir.
+ * @param L The lua intepreter object.
+ * @return The number of results to be passed back to the calling Lua script.
+ */
+static int pReadDir(lua_State *L)
+{
+    const char *dirName = NULL;
+    struct dirent *dp;
+    DIR *dir;
+    int count = 0;
+       
+    if (lua_isstring(L, 1))
+	dirName = lua_tostring(L, 1);
+    else
+	return( pusherror(L, "readdir(string)" ) );
+
+    /* creates a table/array to hold the results */
+    lua_newtable(L);
+
+    dir = opendir(dirName);
+    while (dir) 
+    {
+	if ((dp = readdir(dir)) != NULL) 
+        {
+	    /* Store in the table. */
+	    lua_pushnumber(L, count);
+	    lua_pushstring(L, dp->d_name );
+	    lua_settable(L, -3);
+
+	    count += 1;
+	}
+	else
+	{
+	    closedir( dir );
+	    dir = 0;
+	}
+    }
+
+
+    /* Make sure LUA knows how big our table is. */
+    lua_pushliteral(L, "n");
+    lua_pushnumber(L, count -1 );
+    lua_rawset(L, -3);
+
+    return 1;
+}
+
+
+
+/**
  * Mappings between the LUA code and our C code.
  */
 static const luaL_reg R[] =
@@ -394,6 +495,9 @@ static const luaL_reg R[] =
     {"close",           pClose},
     {"read",		pRead},
     {"write",		pWrite},
+    {"is_dir",          pIsDir},
+    {"is_file",         pIsFile},
+    {"readdir",         pReadDir},
     {NULL,		NULL}
 };
 
