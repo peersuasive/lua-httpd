@@ -22,7 +22,7 @@
  <p>The networking extension implements and exports the following networking primitives:</p>
  <dl>
  <dt><tt><a href="#bind">bind()</a></tt></dt>
- <dd><p>Listen upon a port to accept incomming connections.</p></dd>
+ <dd><p>Listen upon a port to accept incoming connections.</p></dd>
  <dt><tt><a href="#accept">accept()</a></tt></dt>
  <dd><p>Accept a new client connection from a socket, which has previously been returned from a call to <tt>bind()</tt>.</p></dd>
  <dt><tt><a href="#connect">connect()</a></tt></dt>
@@ -35,6 +35,20 @@
  <dd><p>Close an open socket.</p></dd>
  </dl>
  </blockquote>
+
+ <h3>Filesystem Primitives Overview</h3>
+ <blockquote>
+ <p>The extension library also implements three utility functions which are useful when working with local files.</p>
+ <dl>
+ <dt><tt><a href="#is_dir">is_dir()</a></tt></dt>
+ <dd><p>Test whether a directory entry is a directory.</p></dd>
+ <dt><tt><a href="#is_file">is_file()</a></tt></dt>
+ <dd><p>Test whether a directory entry is a file.</p></dd>
+ <dt><tt><a href="#readdir">readdir()</a></tt></dt>
+ <dd><p>Read the name of each file in a given directory.</p></dd>
+ </dl>
+ </blockquote>
+ 
 
  <h3>Detailed API Documentation</h3>
  <blockquote>
@@ -89,6 +103,42 @@ socket.write( listener, data [, length ] );
 socket.close( listener );
 </pre>
   <p>This function closes an open socket - either one returned from <a href="#accept"><tt>accept()</tt></a>, or from <a href="#connect"><tt>connect()</tt></a>.</p>
+ </blockquote>
+
+ <h4 id="is_dir">is_dir( path )</h4>
+ <blockquote>
+  <p>Usage:</p>
+<pre>
+ret = socket.is_dir( "/etc/" );
+</pre>
+  <p>This function will return <tt>true</tt> if the named directory entry is actually a directory.</p></p>
+  </blockquote>
+
+ <h4 id="is_file">is_file( path )</h4>
+ <blockquote>
+  <p>Usage:</p>
+<pre>
+ret = socket.is_file( "/etc/passwd" );
+</pre>
+  <p>This function will return <tt>true</tt> if the named directory entry is actually a file.</p></p>
+  </blockquote>
+
+ <h4 id="readdir">readdir( path )</h4>
+ <blockquote>
+  <p>Usage:</p>
+<pre>
+files = socket.readdir( "/etc/passwd" );
+</pre>
+  <p>This function will return a table containing the directory entries found beneath the given path.  To manipulate the results you may use something like the following:</p>
+<pre>
+--  Read directory entries.
+entries = socket.readdir( "/etc" );
+
+-- For each entry
+for i=0,table.getn(entries) do
+   print( "Found " .. entries[i] );
+end
+</pre>
   </blockquote>
 </div>
 
