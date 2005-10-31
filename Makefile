@@ -16,6 +16,7 @@ clean:
 	-rm -f libhttpd.so libhttpd.o
 	-rm -f build-stamp
 	-if [ -d debian/lua-httpd ]; then rm -rf debian/lua-httpd; fi
+	-find . -name 'access.log' -exec rm \{\} \;
 
 
 diff:
