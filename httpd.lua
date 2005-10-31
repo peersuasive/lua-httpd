@@ -63,7 +63,7 @@
 -- --
 -- http://www.steve.org.uk/
 --
--- $Id: httpd.lua,v 1.29 2005-10-31 07:41:16 steve Exp $
+-- $Id: httpd.lua,v 1.30 2005-10-31 17:00:18 steve Exp $
 
 
 --
@@ -345,19 +345,14 @@ function handleRequest( root, host, path, client )
     -- Otherwise if it is a directory then serve it.
     --
     if ( string.endsWith( file, "/" ) ) then  
-        print("Request ends with '/'" .. file );
         tmp = file .. "index.html";
         if ( fileExists( tmp ) ) then
-           print("Directory index exists : " .. tmp);
            file = tmp;
         else
            if ( socket.is_dir( file ) ) then
-               print( "The given path is a directory : " .. file );
                size = handleDirectory( client, file, path ) ;
                socket.close( client );
                return size, "200";
-           else
-               print( "Nota directory : " .. file );
            end
         end
     end
