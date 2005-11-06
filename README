@@ -18,7 +18,7 @@ Installation
 
 	make
 
-	make install
+	make install  (as root).
 
   This will install the library into the directory /usr/lib/lua/5.0 
  along with a helper package into /usr/share/lua50.
