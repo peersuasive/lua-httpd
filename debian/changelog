@@ -1,3 +1,13 @@
+lua-httpd (0.5-2) stable; urgency=low
+
+  * Minor update:
+    - Include linkes to lua-fs in the API documentation.
+    - Fixed the package description to be 100% accurate.
+    - Package description now links to the homepage.
+    - Strip .cvsignore files from the package.
+
+ -- Steve Kemp <steve@steve.org.uk>  Sun, 6 Nov 2005 20:12:18 +0000
+
 lua-httpd (0.5-1) stable; urgency=low
 
   * New upstream release.
