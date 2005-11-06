@@ -11,8 +11,11 @@ Depends: ${shlibs:Depends}, lua50
 Description: TCP socket library for Lua 5.0
  Luasocket provides a TCP/UDP socket library for Lua 5.0
  .
- Also provided are HTTP and SMTP implementations, a simple
- FTP implementation and some URL parsing functions.
+ The package also provides a simple, but robust, HTTP server
+ written entirely in Lua 5.0.
  .
- Luasocket supports blocking and non-blocking sockets
- and also provides a select() interface to the language.
+ The sample HTTP server can serve multiple virtual hosts, 
+ handle a full range of MIME types and log in the Apache
+ common logfile format for each host.
+ .
+ Homepage: http://www.steve.org.uk/Software/lua-httpd/
