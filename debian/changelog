@@ -1,3 +1,10 @@
+lua-httpd (0.6-1) stable; urgency=low
+
+  * Minor update:
+    - Compatability fixes for Windows/mingw by John Murga.
+
+ -- Steve Kemp <steve@steve.org.uk>  Wed, 26 Jul 2006 10:40:42 +0000
+
 lua-httpd (0.5-2) stable; urgency=low
 
   * Minor update:
