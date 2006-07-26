@@ -20,6 +20,8 @@
  *  Steve Kemp
  *  ---
  *  http://www.steve.org.uk/
+ *  
+ *  Further modification and porting to Win32 and Linux by John Murga 2006  
  *
  */
 
@@ -42,20 +44,34 @@
 
 #define __USE_BSD 1
 #include <string.h>
- 
+
+#ifndef mingw
 #include <arpa/inet.h>
-#include <sys/types.h>
 #include <netinet/in.h>
 #include <sys/socket.h>
+#include <netdb.h>
+#endif
+
+#include <sys/types.h>
 #include <sys/stat.h>
 #include <dirent.h>
 
-#include <netdb.h>
 
 #include <unistd.h>
- 
+
+#ifdef mingw
+
+#include <winsock.h>
+typedef int socklen_t;
+typedef SOCKET t_socket;
+typedef t_socket *p_socket;
+
+#define SOCKET_INVALID (INVALID_SOCKET) 
+
+#endif
+
 #define MYNAME		"libhttpd"
-#define VERSION	        "$Id: libhttpd.c,v 1.18 2005-10-31 16:50:54 steve Exp $"
+#define VERSION	        "$Id: libhttpd.c,v 1.19 2006-07-26 09:33:44 steve Exp $"
 
 
 
@@ -74,6 +90,7 @@ char * getVersion( )
     char *end    = NULL;
     int length   = 0;
     char *prolog = "Release " RELEASE " CVS ID v";
+
 
     static char marker[128] = {'\0'};
 
@@ -154,7 +171,7 @@ static int pBind(lua_State *L)
 
 
     /* Enable address reuse */
-    setsockopt( sockfd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on) );
+    setsockopt( sockfd, SOL_SOCKET, SO_REUSEADDR, (char *) on, sizeof(on) );
 
     memset( &serv_addr, '\0', sizeof(serv_addr));
     serv_addr.sin_family = AF_INET;
@@ -200,7 +217,7 @@ static int pConnect(lua_State *L)
 
     /* Get the host. */ 
     hp = gethostbyname(host);
-    bcopy((char *)hp->h_addr, (char *)&sa.sin_addr, hp->h_length);
+    memcpy((char *)&sa.sin_addr, (char *)hp->h_addr, hp->h_length);
     sa.sin_family = hp->h_addrtype;
     sa.sin_port = htons(port);
     sockfd = socket(hp->h_addrtype, SOCK_STREAM, 0);
@@ -272,7 +289,7 @@ static int pRead(lua_State *L)
 	return( pusherror(L, "read(int)" ) );
     
     /* Do the read */
-    n = read(sockfd,buffer,sizeof(buffer)-1);
+    n = recv(sockfd,buffer,sizeof(buffer)-1,0);
 
     if ( n == -1 )
 	return( pusherror(L, "Problem reading from socket" ) );
@@ -348,7 +365,7 @@ static int pWrite(lua_State *L)
     while (bytesSent < length)
     {
 	/* Send some */
-	int sent = write( sockfd, data + bytesSent, length - bytesSent);
+	int sent = send( sockfd, data + bytesSent, length - bytesSent,0);
 	
 	if (sent <= 0)
 	{
@@ -511,6 +528,16 @@ static const luaL_reg R[] =
  */
 LUALIB_API int luaopen_libhttpd (lua_State *L)
 {
+
+#ifdef mingw
+
+	WORD sockVersion;
+	WSADATA wsaData;
+
+	sockVersion = MAKEWORD(1, 1);
+	WSAStartup(sockVersion, &wsaData);
+#endif
+
     /* Version number from CVS marker. */
     char *version = getVersion();
 
