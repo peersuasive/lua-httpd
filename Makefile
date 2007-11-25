@@ -23,14 +23,14 @@ clean:
 
 
 diff:
-	cvs diff --unified 2>/dev/null
+	hg diff 2>/dev/null
 
 
 debian: clean dist
 	mkdir tmp
 	mv $(BASE)-$(VERSION).tar.gz tmp/$(BASE)_$(VERSION).orig.tar.gz
 	cd tmp && tar -zxvf $(BASE)_$(VERSION).orig.tar.gz
-	find tmp/ -name CVS -exec rm -rf \{\} \;
+	find tmp/ -name '.hg*' -exec rm -rf \{\} \;
 	find tmp/ -name .cvsignore -exec rm -rf \{\} \;
 	cd tmp/$(BASE)-$(VERSION) && debuild -sa
 	mv tmp/$(BASE)_* .
@@ -64,4 +64,4 @@ uninstall:
 	rm -f /usr/share/lua50/libhttpd.lua
 
 update:
-	cvs -z3 update -A -d 2>/dev/null
+	hg pull --update 2>/dev/null
