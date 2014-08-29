@@ -20,8 +20,8 @@
  *  Steve Kemp
  *  ---
  *  http://www.steve.org.uk/
- *  
- *  Further modification and porting to Win32 and Linux by John Murga 2006  
+ *
+ *  Further modification and porting to Win32 and Linux by John Murga 2006
  *
  */
 
@@ -29,7 +29,7 @@
 /*
  *  Each of the functions which passes, or returns, a socket merely
  * accessess them via Lua's "tonumber", or "fromnumber" routines.
- * 
+ *
  *  This is suboptimal, however in the absense of threads it is likely
  * to work out well in practice.
  *
@@ -66,9 +66,15 @@ typedef int socklen_t;
 typedef SOCKET t_socket;
 typedef t_socket *p_socket;
 
-#define SOCKET_INVALID (INVALID_SOCKET) 
+#define SOCKET_INVALID (INVALID_SOCKET)
 
 #endif
+
+
+#ifndef h_addr
+#  define h_addr h_addr_list[0] /* for backward compatibility */
+#endif
+
 
 #define MYNAME		"libhttpd"
 #define VERSION	        "$Id: libhttpd.c,v 1.19 2006-07-26 09:33:44 steve Exp $"
@@ -110,7 +116,7 @@ char * getVersion( )
 
     /* Add on the ",v " text. */
     start += 3;
-   
+
     /* Now find the next space - after the version marker */
     end = strstr( start, " " );
     if ( end == NULL )
@@ -166,12 +172,14 @@ static int pBind(lua_State *L)
 
 
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
-    if (sockfd < 0) 
+    if (sockfd < 0)
         return( pusherror(L, "ERROR opening socket") );
 
 
+
+
     /* Enable address reuse */
-    setsockopt( sockfd, SOL_SOCKET, SO_REUSEADDR, (char *) on, sizeof(on) );
+    setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, (const char *) &on, sizeof(on));
 
     memset( &serv_addr, '\0', sizeof(serv_addr));
     serv_addr.sin_family = AF_INET;
@@ -179,7 +187,7 @@ static int pBind(lua_State *L)
     serv_addr.sin_port = htons(port);
 
     /* bind */
-    if (bind(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0) 
+    if (bind(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0)
 	return( pusherror(L, ("ERROR on binding") ));
 
     /* queue five connections. */
@@ -215,8 +223,9 @@ static int pConnect(lua_State *L)
     else
 	return( pusherror(L, "connect(string,int) incorrect second argument" ) );
 
-    /* Get the host. */ 
+    /* Get the host. */
     hp = gethostbyname(host);
+
     memcpy((char *)&sa.sin_addr, (char *)hp->h_addr, hp->h_length);
     sa.sin_family = hp->h_addrtype;
     sa.sin_port = htons(port);
@@ -249,16 +258,16 @@ static int pAccept(lua_State *L)
 	sockfd =lua_tonumber(L, 1);
     else
 	return( pusherror(L, "accept(int) requires listening socket." ) );
-    
+
     /* accept() */
     clilen = sizeof(cli_addr);
     newsockfd = accept(sockfd, (struct sockaddr *) &cli_addr, &clilen);
 
     /* Return error on failure */
-    if (newsockfd < 0) 
+    if (newsockfd < 0)
 	return( pusherror(L,"ERROR on accept"));
 
-    
+
     /*
      * Return the new socket and the connecting IP address.
      */
@@ -282,12 +291,12 @@ static int pRead(lua_State *L)
     /* Buffer we read() into */
     char buffer[4096];
     memset( buffer, '\0', sizeof(buffer));
-    
+
     if (lua_isnumber(L, 1))
 	sockfd =lua_tonumber(L, 1);
     else
 	return( pusherror(L, "read(int)" ) );
-    
+
     /* Do the read */
     n = recv(sockfd,buffer,sizeof(buffer)-1,0);
 
@@ -297,7 +306,7 @@ static int pRead(lua_State *L)
     /* Return the data, and the length of that data */
     lua_pushnumber(L, n );
     lua_pushlstring(L, buffer, n );
-    
+
     return( 2 );
 }
 
@@ -366,14 +375,14 @@ static int pWrite(lua_State *L)
     {
 	/* Send some */
 	int sent = send( sockfd, data + bytesSent, length - bytesSent,0);
-	
+
 	if (sent <= 0)
 	{
 	    return( pusherror(L, "Problem writing to socket" ) );
 	}
 
 	bytesSent += sent ;
-    }   
+    }
 
     return 0;
 }
@@ -416,7 +425,7 @@ static int pIsDir(lua_State *L)
     else
 	return( pusherror(L, "is_dir(string)" ) );
 
-    if (stat(fileName, &st) == 0) 
+    if (stat(fileName, &st) == 0)
 	lua_pushboolean(L, S_ISDIR(st.st_mode) );
     else
 	return( pusherror(L, "stat failed!" ) );
@@ -441,7 +450,7 @@ static int pIsFile(lua_State *L)
     else
 	return( pusherror(L, "is_file(string)" ) );
 
-    if (stat(fileName, &st) == 0) 
+    if (stat(fileName, &st) == 0)
 	lua_pushboolean(L, S_ISREG(st.st_mode) );
     else
 	return( pusherror(L, "stat failed!" ) );
@@ -462,7 +471,7 @@ static int pReadDir(lua_State *L)
     struct dirent *dp;
     DIR *dir;
     int count = 0;
-       
+
     if (lua_isstring(L, 1))
 	dirName = lua_tostring(L, 1);
     else
@@ -472,9 +481,9 @@ static int pReadDir(lua_State *L)
     lua_newtable(L);
 
     dir = opendir(dirName);
-    while (dir) 
+    while (dir)
     {
-	if ((dp = readdir(dir)) != NULL) 
+	if ((dp = readdir(dir)) != NULL)
         {
 	    /* Store in the table. */
 	    lua_pushnumber(L, count);
