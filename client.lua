@@ -18,7 +18,7 @@ print( "Loaded the socket library, version:\n  " .. socket.version );
 --
 --  Connect to localhost.
 --
-sock = socket.connect( "localhost", 80 );
+sock = socket.connect( "www.steve.org.uk", 80 );
 
 if ( sock == nil ) then
    error( "Socket failed to connect" );
