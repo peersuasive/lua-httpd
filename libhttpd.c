@@ -404,9 +404,11 @@ static int pClose(lua_State *L)
     else
 	return( pusherror(L, "close(int)" ) );
 
-    close( sockfd );
+    if (! close( sockfd ) )
+        return( pusherror(L, "close()") );
 
-    return( 0 );
+    lua_pushboolean(L, 1);
+    return 1;
 }
 
 
