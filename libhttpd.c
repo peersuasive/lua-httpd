@@ -384,7 +384,8 @@ static int pWrite(lua_State *L)
 	bytesSent += sent ;
     }
 
-    return 0;
+    lua_pushnumber(L, bytesSent);
+    return 1;
 }
 
 
