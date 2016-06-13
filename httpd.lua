@@ -373,7 +373,7 @@ function handleRequest( root, host, path, client )
     --
     -- Find the suffix to get the mime.type.
     --
-    _, _, ext  = string.find( file, "\.([^\.]+)$" );
+    _, _, ext  = string.find( file, [=[\.([^\.]+)$]=] );
     if ( ext == nil ) then
        ext = "html";   -- HACK
     end
