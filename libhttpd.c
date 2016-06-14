@@ -165,17 +165,19 @@ static int pBind(lua_State *L)
     int on   = 1;
     int port = 0;
 
-    if (lua_isnumber(L, 1))
-	port =lua_tonumber(L, 1);
-    else
-	return( pusherror(L, "bind(int) requires a port number" ) );
+    struct hostent *host;
 
+    if (lua_isnumber(L, 1))
+	    port = lua_tonumber(L, 1);
+    else
+    	return( pusherror(L, "bind(int[,ip]) requires a port number and an optional hostname or IP" ) );
+
+    if (! lua_isnoneornil(L, 2) && ! lua_isstring(L, 2) )
+    	return( pusherror(L, "bind(int[,ip]) requires a port number and an optional hostname or IP" ) );
 
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd < 0)
         return( pusherror(L, "ERROR opening socket") );
-
-
 
 
     /* Enable address reuse */
@@ -183,7 +185,10 @@ static int pBind(lua_State *L)
 
     memset( &serv_addr, '\0', sizeof(serv_addr));
     serv_addr.sin_family = AF_INET;
-    serv_addr.sin_addr.s_addr = INADDR_ANY;
+    if ( ! lua_isnoneornil(L,2) && (host = gethostbyname(lua_tostring(L,2))) != NULL )
+        memcpy(&serv_addr.sin_addr, host->h_addr_list[0], host->h_length);
+    else
+        serv_addr.sin_addr.s_addr = INADDR_ANY;
     serv_addr.sin_port = htons(port);
 
     /* bind */
