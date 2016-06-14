@@ -543,7 +543,7 @@ static const luaL_reg R[] =
  * @param L The lua intepreter object.
  * @return 1 on success, 0 on failure.
  */
-LUALIB_API int luaopen_libhttpd (lua_State *L)
+LUALIB_API int luaopen_lwmf_libhttpd (lua_State *L)
 {
 
 #ifdef mingw
